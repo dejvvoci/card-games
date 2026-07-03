@@ -1,0 +1,52 @@
+/*
+ * DESIGN SYSTEM — "Revistë Arti me Identitet Shqiptar"
+ * ------------------------------------------------------------
+ * Importo këtë skedar një herë te src/styles.css (global), p.sh:
+ *   @import './styles/design-tokens.css';
+ * Të gjithë komponentët përdorin këto variabla — asnjë ngjyrë/font hardcoded.
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Sora:wght@300;400;500;600&display=swap');
+
+:root {
+  /* ===== TIPOGRAFIA ===== */
+  --font-display: 'Fraunces', 'Georgia', serif;   /* titujt - karakter, jo Inter/Arial */
+  --font-body: 'Sora', 'Segoe UI', sans-serif;     /* teksti - modern, jo Inter */
+
+  --weight-light: 300;
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;   /* MAX për titujt - kurrë 700/800 */
+
+  /* ===== PALETA (asnjë gray/slate/zinc — vetëm nuanca të ngrohta) ===== */
+  --color-bg: #F8F4EC;             /* Warm Cream */
+  --color-surface: #FFFDF8;        /* sipërfaqe kartash, pak më e ndritshme se bg */
+  --color-surface-tint: #F1EADA;   /* sipërfaqe dytësore (input, hover) */
+
+  --color-primary: #0F5132;        /* Deep Emerald - identiteti i Pesëkatëshit */
+  --color-primary-soft: #D1E7DD;   /* Soft Sage */
+  --color-primary-deep: #0A3823;   /* emerald edhe më i errët, për tekst mbi sage */
+
+  --color-accent: #C16E51;         /* Muted Terracotta - identiteti i Peseqindsh + CTA */
+  --color-accent-soft: #EFDACD;    /* terracotta e zbutur për sfonde badge/etiketa */
+  --color-accent-deep: #8A4A34;    /* terracotta e errët, për tekst mbi accent-soft */
+
+  --color-text: #211F1A;            /* "e zezë" e ngrohtë, pak më e thellë për lexueshmëri */
+  --color-text-muted: #55503F;      /* muted i ngrohtë, por me kontrast të mjaftueshëm (jo më i zbehtë) */
+  --color-text-on-primary: #F8F4EC;
+  --color-text-on-accent: #FDF6F1;
+
+  --color-border: rgba(33, 31, 26, 0.14);          /* pak më e dukshme se më parë */
+  --color-border-strong: rgba(33, 31, 26, 0.30);   /* dukshëm më e fortë - kufijtë e butonave/fushave */
+
+  /* ===== FORMA ===== */
+  --radius-sm: 12px;
+  --radius-md: 20px;   /* ~ rounded-2xl */
+  --radius-lg: 28px;   /* ~ rounded-3xl */
+  --radius-pill: 999px;
+
+  /* ===== HIJE TË BUTA (të tonuara me primary, jo të zeza) ===== */
+  --shadow-soft: 0 10px 30px -8px rgba(15, 81, 50, 0.16);
+  --shadow-soft-accent: 0 10px 30px -8px rgba(193, 110, 81, 0.20);
+  --shadow-inset-glass: inset 0 1px 0 rgba(255,255,255,0.4);
+}
