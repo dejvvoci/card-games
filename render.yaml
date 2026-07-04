@@ -8,13 +8,4 @@ services:
     plan: free
     envVars:
       - key: ALLOWED_ORIGINS
-        value: "*"   # rregulloje me URL-në e frontend-it pas deploy të parë
-
-  # ---- FRONTEND: Angular (Static Site) ----
-  - type: web
-    name: pesekatesh-frontend
-    runtime: static
-    rootDir: card-games-frontend
-    buildCommand: npm install && npm run build -- --configuration production
-    staticPublishPath: dist/card-games-frontend/browser
-    plan: free
+        value: "*"   # rregulloje me URL-në e frontend-it (Netlify) pas deploy të parë
