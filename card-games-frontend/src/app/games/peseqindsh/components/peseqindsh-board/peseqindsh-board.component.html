@@ -1,17 +1,26 @@
 <div class="join-screen" *ngIf="!joined">
   <div class="join-card">
+    <button class="back-btn" (click)="backToSelector()">← Kthehu te lojërat</button>
     <p class="eyebrow">Peseqindsh</p>
     <h2>Përgatit tavolinën</h2>
 
     <label class="field-label">Emri yt</label>
     <input class="field-input" type="text" [(ngModel)]="username" maxlength="20" />
 
-    <label class="field-label">Kodi i dhomës</label>
-    <div class="room-row">
-      <input class="field-input" type="text" [(ngModel)]="roomId" maxlength="10" />
-      <button class="regenerate-btn" (click)="roomId = generateRoomCode()">🔄</button>
+    <label class="field-label">Mënyra e lojës</label>
+    <div class="mode-toggle">
+      <button [class.active]="mode==='solo'" (click)="mode='solo'">Solo (kundër Bot)</button>
+      <button [class.active]="mode==='multiplayer'" (click)="mode='multiplayer'">Multiplayer (2 real)</button>
     </div>
-    <p class="hint">Ndaje këtë kod me shokun tënd — të dy duhet të fusin të njëjtin kod.</p>
+
+    <ng-container *ngIf="mode==='multiplayer'">
+      <label class="field-label">Kodi i dhomës</label>
+      <div class="room-row">
+        <input class="field-input" type="text" [(ngModel)]="roomId" maxlength="10" />
+        <button class="regenerate-btn" (click)="roomId = generateRoomCode()">🔄</button>
+      </div>
+      <p class="hint">Ndaje këtë kod me shokun tënd — të dy duhet të fusin të njëjtin kod.</p>
+    </ng-container>
 
     <button class="join-btn" [disabled]="!canJoin" (click)="onJoinSubmit()">Hyr në tavolinë →</button>
   </div>
@@ -128,6 +137,7 @@
 
   <div class="game-over-banner" *ngIf="s.phase === 'GAME_OVER'">
     🏆 Loja mbaroi! Dikush arriti 500 pikë.
+    <button (click)="backToSelector()">Kthehu te lojërat</button>
   </div>
 
 </div>

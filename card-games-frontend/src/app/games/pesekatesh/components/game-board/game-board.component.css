@@ -345,6 +345,19 @@
   box-shadow: var(--shadow-soft);
   text-align: left;
 }
+.back-btn {
+  display: inline-block;
+  background: transparent;
+  border: none;
+  color: var(--color-text-muted);
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: var(--weight-medium);
+  cursor: pointer;
+  padding: 0;
+  margin: 0 0 18px;
+}
+.back-btn:hover { color: var(--color-primary-deep); }
 .join-card .eyebrow {
   font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em;
   color: var(--color-primary); font-weight: var(--weight-medium); margin: 0 0 8px;

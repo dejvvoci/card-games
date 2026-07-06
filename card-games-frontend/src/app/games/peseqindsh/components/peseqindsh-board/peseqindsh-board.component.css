@@ -139,7 +139,7 @@
   font-weight: var(--weight-medium);
   color: var(--color-primary-deep);
 }
-.round-over-banner button {
+.round-over-banner button, .game-over-banner button {
   margin-top: 10px;
   background: var(--color-primary); color: var(--color-text-on-primary); border: none;
   padding: 10px 22px; border-radius: var(--radius-pill); cursor: pointer;
@@ -183,6 +183,30 @@
 .join-card h2 {
   font-family: var(--font-display); font-weight: var(--weight-medium);
   font-size: 26px; color: var(--color-accent-deep); margin: 0 0 24px;
+}
+.back-btn {
+  display: inline-block;
+  background: transparent;
+  border: none;
+  color: var(--color-text-muted);
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: var(--weight-medium);
+  cursor: pointer;
+  padding: 0;
+  margin: 0 0 18px;
+}
+.back-btn:hover { color: var(--color-accent-deep); }
+.mode-toggle { display: flex; gap: 8px; }
+.mode-toggle button {
+  flex: 1; padding: 11px 8px; border-radius: var(--radius-sm);
+  border: 1.5px solid var(--color-border-strong); background: var(--color-surface);
+  color: var(--color-text); font-size: 13px; font-weight: var(--weight-semibold);
+  cursor: pointer; font-family: var(--font-body);
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+.mode-toggle button.active {
+  background: var(--color-accent); color: var(--color-text-on-accent); border-color: var(--color-accent);
 }
 .field-label {
   display: block; font-size: 13px; font-weight: var(--weight-semibold);

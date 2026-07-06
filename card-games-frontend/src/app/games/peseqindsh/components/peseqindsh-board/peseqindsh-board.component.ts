@@ -1,6 +1,7 @@
 import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { PeseqindshWebSocketService } from '../../services/peseqindsh-websocket.service';
 import { PeseqindshStateView, MeldView, PeseqindshPlayerView } from '../../models/game-state.model';
@@ -32,6 +33,7 @@ export class PeseqindshBoardComponent implements OnInit, OnDestroy {
   // ---- Ekrani i hyrjes (para lidhjes WebSocket) ----
   joined = false;
   username = '';
+  mode: 'solo' | 'multiplayer' = 'solo';
   roomId = '';
 
   private subs: Subscription[] = [];
@@ -40,7 +42,8 @@ export class PeseqindshBoardComponent implements OnInit, OnDestroy {
   lobbySecondsLeft = 0;
   private lobbyCountdownTimer: ReturnType<typeof setInterval> | null = null;
 
-  constructor(private ws: PeseqindshWebSocketService, private cdr: ChangeDetectorRef, public auth: AuthService) {}
+  constructor(private ws: PeseqindshWebSocketService, private cdr: ChangeDetectorRef, public auth: AuthService,
+              private router: Router) {}
 
   ngOnInit(): void {
     if (this.auth.username()) {
@@ -86,14 +89,23 @@ export class PeseqindshBoardComponent implements OnInit, OnDestroy {
   }
 
   get canJoin(): boolean {
-    return !!this.username.trim() && !!this.roomId.trim();
+    if (!this.username.trim()) return false;
+    if (this.mode === 'multiplayer' && !this.roomId.trim()) return false;
+    return true;
   }
 
   onJoinSubmit(): void {
     if (!this.canJoin) return;
     const playerId = 'p-' + Math.random().toString(36).substring(2, 10);
-    this.ws.connect(this.roomId.trim().toUpperCase(), playerId, this.username.trim(), this.auth.getToken());
+    // Solo: dhomë private e gjeneruar automatikisht (bot-i plotësohet menjëherë nga backend)
+    const roomToJoin = this.mode === 'solo' ? 'solo-' + playerId : this.roomId.trim().toUpperCase();
+    this.ws.connect(roomToJoin, playerId, this.username.trim(), this.mode === 'solo', this.auth.getToken());
     this.joined = true;
+  }
+
+  backToSelector(): void {
+    if (this.joined) this.ws.disconnect();
+    this.router.navigateByUrl('/');
   }
 
   // ============================================================

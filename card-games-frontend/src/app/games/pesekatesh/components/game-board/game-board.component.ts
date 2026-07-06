@@ -1,6 +1,7 @@
 import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { GameWebSocketService } from '../../services/game-websocket.service';
 import { GameStateView, PlayerView } from '../../models/game-state.model';
@@ -50,7 +51,8 @@ export class GameBoardComponent implements OnInit, OnDestroy {
   lobbySecondsLeft = 0;
   private lobbyCountdownTimer: ReturnType<typeof setInterval> | null = null;
 
-  constructor(private ws: GameWebSocketService, private cdr: ChangeDetectorRef, public auth: AuthService) {}
+  constructor(private ws: GameWebSocketService, private cdr: ChangeDetectorRef, public auth: AuthService,
+              private router: Router) {}
 
   ngOnInit(): void {
     if (this.auth.username()) {
@@ -177,7 +179,8 @@ export class GameBoardComponent implements OnInit, OnDestroy {
   }
 
   backToSelector(): void {
-    window.location.href = '/';
+    if (this.joined) this.ws.disconnect();
+    this.router.navigateByUrl('/');
   }
 
   // ============================================================

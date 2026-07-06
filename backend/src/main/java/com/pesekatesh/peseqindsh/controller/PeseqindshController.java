@@ -53,9 +53,14 @@ public class PeseqindshController {
             state.getPlayers().add(player);
         }
 
-        // Nëse brenda 60s nga hapja e dhomës vendi tjetër s'plotësohet me lojtar të vërtetë,
-        // plotësohet automatikisht me BOT dhe loja fillon
-        scheduleLobbyBotFillIfNeeded(session);
+        if (msg.isSoloVsBots()) {
+            // SOLO MODE: plotëso menjëherë vendin tjetër me BOT
+            fillRemainingSeatsWithBots(state);
+        } else {
+            // MULTIPLAYER: nëse brenda 60s nga hapja e dhomës vendi tjetër s'plotësohet me lojtar të vërtetë,
+            // plotësohet automatikisht me BOT dhe loja fillon
+            scheduleLobbyBotFillIfNeeded(session);
+        }
 
         broadcastState(state);
         startMatchIfReady(session);
