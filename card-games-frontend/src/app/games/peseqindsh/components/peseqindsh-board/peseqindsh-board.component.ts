@@ -30,6 +30,9 @@ export class PeseqindshBoardComponent implements OnInit, OnDestroy {
   /** Kombinimet e "vendosura mënjanë" gjatë ndërtimit të hapjes 25-pikëshe */
   stagedGroups: Card[][] = [];
 
+  /** Modal me të gjitha kombinimet e mia në tokë (për të parë pikët e grumbulluara) */
+  showMyMeldsModal = false;
+
   // ---- Ekrani i hyrjes (para lidhjes WebSocket) ----
   joined = false;
   username = '';
@@ -146,6 +149,10 @@ export class PeseqindshBoardComponent implements OnInit, OnDestroy {
     return (this.state?.melds ?? []).filter((m) => m.ownerSeat === this.opponent?.seatIndex);
   }
 
+  get myMeldsTotalPoints(): number {
+    return this.myMelds.reduce((sum, m) => sum + m.points, 0);
+  }
+
   get stagedTotalPoints(): number {
     // Vlerësim orientues në frontend (backend rivalidon saktë);
     // ndjek të njëjtën shkallë si BE: 3-8=5, 9-K=10, A=15, 2=20.
@@ -172,6 +179,17 @@ export class PeseqindshBoardComponent implements OnInit, OnDestroy {
 
   get canStageSelectedGroup(): boolean {
     return !this.me?.hasOpened && this.selectedCards.length >= 3;
+  }
+
+  /** Butoni "Mbaro radhën" vlen VETËM pasi ke marrë tokën këtë radhë dhe ke përdorur të gjitha letrat e detyruara */
+  get canEndForcedTurn(): boolean {
+    return this.isMyTurn && !!this.state?.tookOpenPileThisTurn
+      && (this.state?.pendingForcedCards.length ?? 0) === 0;
+  }
+
+  /** Letrat e hedhura që nga fillimi i raundit, si karta {suit,rank} për historikun në qendër të ekranit */
+  get discardHistoryCards(): Card[] {
+    return (this.state?.discardHistory ?? []).map(parseCardLabel);
   }
 
   // ============================================================
@@ -250,11 +268,16 @@ export class PeseqindshBoardComponent implements OnInit, OnDestroy {
   }
 
   onEndForcedTurn(): void {
+    if (!this.canEndForcedTurn) return;
     this.ws.endForcedTurn();
   }
 
   onNextRound(): void {
     this.ws.nextRound();
+  }
+
+  toggleMyMeldsModal(): void {
+    this.showMyMeldsModal = !this.showMyMeldsModal;
   }
 
   private showError(msg: string): void {

@@ -26,6 +26,9 @@ public class PeseqindshState {
     private List<Card> openPile = new ArrayList<>();       // letrat e hapura/prera (fundi i listës = maja)
     private List<Meld> melds = new ArrayList<>();          // kombinimet e shtruara nga të dy lojtarët
 
+    /** Historiku i PLOTË i letrave të hedhura këtë raund, që nga fillimi — s'pastrohet kurrë nga toka (ndryshe nga openPile) */
+    private List<Card> discardHistory = new ArrayList<>();
+
     private int currentPlayerSeat;
     private int cutterSeat = 0; // kush ka të drejtë të presë letrat për raundin aktual
 
@@ -38,6 +41,9 @@ public class PeseqindshState {
 
     /** A ka bërë lojtari aktual hedhjen e detyrueshme të letrës këtë radhë? */
     private boolean discardedThisTurn = false;
+
+    /** A e mori lojtari aktual GJITHË tokën këtë radhë? (kusht i domosdoshëm për endForcedTurn) */
+    private boolean tookOpenPileThisTurn = false;
 
     private int roundNumber = 1;
 
@@ -56,8 +62,11 @@ public class PeseqindshState {
     public int getCutterSeat() { return cutterSeat; }
     public void setCutterSeat(int s) { this.cutterSeat = s; }
     public List<Card> getPendingForcedCards() { return pendingForcedCards; }
+    public List<Card> getDiscardHistory() { return discardHistory; }
     public boolean isDiscardedThisTurn() { return discardedThisTurn; }
     public void setDiscardedThisTurn(boolean v) { this.discardedThisTurn = v; }
+    public boolean isTookOpenPileThisTurn() { return tookOpenPileThisTurn; }
+    public void setTookOpenPileThisTurn(boolean v) { this.tookOpenPileThisTurn = v; }
     public int getRoundNumber() { return roundNumber; }
     public void setRoundNumber(int r) { this.roundNumber = r; }
     public long getLobbyDeadlineEpochMs() { return lobbyDeadlineEpochMs; }
@@ -81,6 +90,7 @@ public class PeseqindshState {
     public void switchTurn() {
         currentPlayerSeat = (currentPlayerSeat + 1) % 2;
         discardedThisTurn = false;
+        tookOpenPileThisTurn = false;
     }
 
     public List<Meld> meldsOwnedBy(int seat) {
@@ -92,7 +102,9 @@ public class PeseqindshState {
         openPile.clear();
         melds.clear();
         pendingForcedCards.clear();
+        discardHistory.clear();
         discardedThisTurn = false;
+        tookOpenPileThisTurn = false;
         for (PeseqindshPlayer p : players) {
             p.getHand().clear();
             p.setHasOpened(false);

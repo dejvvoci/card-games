@@ -172,6 +172,9 @@ public class PeseqindshService {
 
     /** Hapja e parë: një ose disa kombinime njëkohësisht që totalizojnë >= 25 pikë */
     public void openHand(PeseqindshState state, PeseqindshPlayer player, List<List<Card>> meldGroups) {
+        if (state.getCurrentPlayerSeat() != player.getSeatIndex()) {
+            throw new IllegalStateException("Nuk është radha jote.");
+        }
         if (player.isHasOpened()) {
             throw new IllegalStateException("Je tashmë i shtruar.");
         }
@@ -196,6 +199,9 @@ public class PeseqindshService {
 
     /** Pasi je i shtruar: shto një kombinim të ri pa kufizim pikësh */
     public void addMeld(PeseqindshState state, PeseqindshPlayer player, List<Card> cards) {
+        if (state.getCurrentPlayerSeat() != player.getSeatIndex()) {
+            throw new IllegalStateException("Nuk është radha jote.");
+        }
         if (!player.isHasOpened()) {
             throw new IllegalStateException("Duhet të bësh hapjen (25p) para se të shtosh kombinime të tjera.");
         }
@@ -208,6 +214,9 @@ public class PeseqindshService {
 
     /** Zgjat një kombinim ekzistues në tokë (të vetin ose të kundërshtarit) me 1 letër */
     public void extendMeld(PeseqindshState state, PeseqindshPlayer player, String meldId, Card card) {
+        if (state.getCurrentPlayerSeat() != player.getSeatIndex()) {
+            throw new IllegalStateException("Nuk është radha jote.");
+        }
         if (!player.isHasOpened()) {
             throw new IllegalStateException("Duhet të jesh i shtruar për të zgjatur kombinime.");
         }
@@ -267,6 +276,7 @@ public class PeseqindshService {
             throw new IllegalStateException("Nuk e ke këtë letër në dorë.");
         }
         state.getOpenPile().add(card);
+        state.getDiscardHistory().add(card);
         state.setDiscardedThisTurn(true);
 
         if (player.isHandEmpty()) {
@@ -305,12 +315,19 @@ public class PeseqindshService {
         player.getHand().addAll(taken);
         state.getPendingForcedCards().clear();
         state.getPendingForcedCards().addAll(taken);
+        state.setTookOpenPileThisTurn(true);
         // Radha NUK kalon ende — pritet t'i përdorë të gjitha te addMeld/extendMeld,
         // pastaj thirret endForcedTurn().
     }
 
     /** Thirret pasi lojtari ka përdorur të gjitha letrat 'pending' nga takeOpenPile */
     public void endForcedTurn(PeseqindshState state, PeseqindshPlayer player) {
+        if (state.getCurrentPlayerSeat() != player.getSeatIndex()) {
+            throw new IllegalStateException("Nuk është radha jote.");
+        }
+        if (!state.isTookOpenPileThisTurn()) {
+            throw new IllegalStateException("S'ke marrë tokën këtë radhë — duhet ta tërheqësh letrën nga Talon-i për ta mbyllur radhën.");
+        }
         if (!state.getPendingForcedCards().isEmpty()) {
             throw new IllegalStateException("Duhet të përdorësh të gjitha letrat e marra nga toka para se të vazhdosh.");
         }

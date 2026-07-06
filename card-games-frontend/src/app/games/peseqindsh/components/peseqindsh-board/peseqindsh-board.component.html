@@ -81,6 +81,14 @@
     </div>
   </div>
 
+  <!-- HISTORIKU I PLOTË I LETRAVE TË HEDHURA (që nga fillimi i raundit) -->
+  <div class="discard-history" *ngIf="discardHistoryCards.length">
+    <p class="history-label">Letrat e hedhura ({{ discardHistoryCards.length }})</p>
+    <div class="history-cards">
+      <app-playing-card *ngFor="let c of discardHistoryCards" [suit]="c.suit" [rank]="c.rank" [width]="24"></app-playing-card>
+    </div>
+  </div>
+
   <!-- KOMBINIMET E MIA NË TOKË -->
   <div class="melds-row my-melds" *ngIf="myMelds.length">
     <div class="meld" *ngFor="let m of myMelds" (click)="onMeldClick(m)">
@@ -126,7 +134,12 @@
       <button (click)="onAddMeld()" [disabled]="!canAddSelectedAsMeld">Fut kombinim të ri</button>
     </ng-container>
 
-    <button (click)="onEndForcedTurn()" *ngIf="s.phase==='PLAYING'">Mbaro radhën (nëse ke marrë tokën)</button>
+    <button (click)="onEndForcedTurn()" [disabled]="!canEndForcedTurn" *ngIf="s.phase==='PLAYING' && s.tookOpenPileThisTurn">
+      Mbaro radhën
+    </button>
+    <button class="my-melds-btn" (click)="toggleMyMeldsModal()" *ngIf="myMelds.length">
+      Kombinimet e mia ({{ myMeldsTotalPoints }}p)
+    </button>
   </div>
 
   <!-- FUNDI I RAUNDIT / LOJËS -->
@@ -138,6 +151,24 @@
   <div class="game-over-banner" *ngIf="s.phase === 'GAME_OVER'">
     🏆 Loja mbaroi! Dikush arriti 500 pikë.
     <button (click)="backToSelector()">Kthehu te lojërat</button>
+  </div>
+
+  <!-- MODAL: TË GJITHA KOMBINIMET E MIA, PËR TË PARË PIKËT E GRUMBULLUARA -->
+  <div class="modal-overlay" *ngIf="showMyMeldsModal" (click)="toggleMyMeldsModal()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Kombinimet e mia — {{ myMeldsTotalPoints }} pikë gjithsej</h3>
+        <button class="modal-close" (click)="toggleMyMeldsModal()">✕</button>
+      </div>
+      <div class="modal-melds">
+        <div class="modal-meld" *ngFor="let m of myMelds">
+          <div class="modal-meld-cards">
+            <app-playing-card *ngFor="let c of m.cards" [suit]="parseLabel(c).suit" [rank]="parseLabel(c).rank" [width]="40"></app-playing-card>
+          </div>
+          <span class="modal-meld-points">{{ m.points }}p</span>
+        </div>
+      </div>
+    </div>
   </div>
 
 </div>

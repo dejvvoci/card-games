@@ -206,11 +206,11 @@ public class PeseqindshController {
 
     private void broadcastState(PeseqindshState state) {
         for (PeseqindshPlayer p : state.getPlayers()) {
-            PeseqindshStateDto dto = PeseqindshStateDto.from(state, p.getId());
+            PeseqindshStateDto dto = PeseqindshStateDto.from(state, p.getId(), gameService);
             messagingTemplate.convertAndSendToUser(p.getId(), "/queue/peseqindsh-state", dto);
         }
         messagingTemplate.convertAndSend("/topic/peseqindsh/room/" + state.getRoomId(),
-                PeseqindshStateDto.from(state, null));
+                PeseqindshStateDto.from(state, null, gameService));
 
         // Ndeshja sapo mbaroi -> regjistro historikun e statistikave (vetëm një herë) për lojtarët e loguar
         if (state.getPhase() == PeseqindshPhase.GAME_OVER && state.markResultsRecorded()) {
