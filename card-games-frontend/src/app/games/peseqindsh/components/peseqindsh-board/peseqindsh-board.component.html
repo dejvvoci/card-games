@@ -65,27 +65,29 @@
     </div>
   </div>
 
-  <!-- QENDRA: Talon + Grumbulli i hapur -->
+  <!-- QENDRA: Talon + Grumbulli i hapur (çdo letër e dukshme veç e veç) -->
   <div class="center-row">
-    <div class="pile closed-pile" (click)="onDrawClosed()" [class.active]="canDrawClosed">
+    <div class="pile closed-pile" (click)="onDrawClosed()" [class.active]="canDrawClosed" [class.pulse]="talonPulse">
       <app-playing-card [faceDown]="true" [width]="46" backFill="#8a2222"></app-playing-card>
       <span class="pile-label">Talon ({{ s.closedPileCount }})</span>
     </div>
 
-    <div class="pile open-pile" (click)="onTakeOpenPile()" [class.active]="canTakeOpenPile">
-      <app-playing-card *ngIf="topOfOpenPile" [suit]="parseLabel(topOfOpenPile).suit" [rank]="parseLabel(topOfOpenPile).rank" [width]="46"></app-playing-card>
+    <div class="open-pile-area">
       <span class="pile-label">
-        Toka ({{ s.openPile.length }})
-        <em *ngIf="me?.hasOpened">— kliko për ta marrë tërësisht</em>
+        Letrat e hedhura ({{ s.openPile.length }})
+        <em *ngIf="me?.hasOpened">— kliko një letër për ta marrë atë e ç'ka mbi të, ose "Merr gjithë tokën"</em>
       </span>
-    </div>
-  </div>
-
-  <!-- HISTORIKU I PLOTË I LETRAVE TË HEDHURA (që nga fillimi i raundit) -->
-  <div class="discard-history" *ngIf="discardHistoryCards.length">
-    <p class="history-label">Letrat e hedhura ({{ discardHistoryCards.length }})</p>
-    <div class="history-cards">
-      <app-playing-card *ngFor="let c of discardHistoryCards" [suit]="c.suit" [rank]="c.rank" [width]="24"></app-playing-card>
+      <div class="open-pile-cards" [class.pulse]="justDiscardedPulse">
+        <app-playing-card
+          *ngFor="let label of s.openPile; let last = last"
+          [suit]="parseLabel(label).suit"
+          [rank]="parseLabel(label).rank"
+          [width]="40"
+          [clickable]="canTakeFromOpenPile"
+          [class.just-discarded]="last && justDiscardedPulse"
+          (cardClick)="onTakeFromOpenPile(parseLabel(label))">
+        </app-playing-card>
+      </div>
     </div>
   </div>
 
@@ -108,16 +110,24 @@
     </button>
   </div>
 
-  <!-- DORA IME -->
+  <!-- DORA IME (mund të rirenditet me drag & drop, thjesht për organizim personal) -->
   <div class="my-hand">
     <app-playing-card
-      *ngFor="let card of myHandCards"
+      *ngFor="let card of myHandCards; let i = index"
       [suit]="card.suit"
       [rank]="card.rank"
       [width]="56"
       [clickable]="true"
       [selected]="isSelected(card)"
-      (cardClick)="toggleSelect(card)">
+      [class.just-drawn]="i === justDrewCardIndex"
+      [class.dragging]="i === dragFromIndex"
+      [class.drag-over]="i === dragOverIndex && i !== dragFromIndex"
+      draggable="true"
+      (cardClick)="toggleSelect(card)"
+      (dragstart)="onHandDragStart(i, $event)"
+      (dragover)="onHandDragOver(i, $event)"
+      (drop)="onHandDrop(i, $event)"
+      (dragend)="onHandDragEnd()">
     </app-playing-card>
   </div>
 
@@ -139,6 +149,9 @@
     </button>
     <button class="my-melds-btn" (click)="toggleMyMeldsModal()" *ngIf="myMelds.length">
       Kombinimet e mia ({{ myMeldsTotalPoints }}p)
+    </button>
+    <button class="my-melds-btn" (click)="toggleOpponentMeldsModal()" *ngIf="opponentMelds.length">
+      Kombinimet e kundërshtarit ({{ opponentMeldsTotalPoints }}p)
     </button>
   </div>
 
@@ -162,6 +175,24 @@
       </div>
       <div class="modal-melds">
         <div class="modal-meld" *ngFor="let m of myMelds">
+          <div class="modal-meld-cards">
+            <app-playing-card *ngFor="let c of m.cards" [suit]="parseLabel(c).suit" [rank]="parseLabel(c).rank" [width]="40"></app-playing-card>
+          </div>
+          <span class="modal-meld-points">{{ m.points }}p</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: TË GJITHA KOMBINIMET E KUNDËRSHTARIT -->
+  <div class="modal-overlay" *ngIf="showOpponentMeldsModal" (click)="toggleOpponentMeldsModal()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Kombinimet e kundërshtarit — {{ opponentMeldsTotalPoints }} pikë gjithsej</h3>
+        <button class="modal-close" (click)="toggleOpponentMeldsModal()">✕</button>
+      </div>
+      <div class="modal-melds">
+        <div class="modal-meld" *ngFor="let m of opponentMelds">
           <div class="modal-meld-cards">
             <app-playing-card *ngFor="let c of m.cards" [suit]="parseLabel(c).suit" [rank]="parseLabel(c).rank" [width]="40"></app-playing-card>
           </div>

@@ -30,8 +30,22 @@ export class PeseqindshBoardComponent implements OnInit, OnDestroy {
   /** Kombinimet e "vendosura mënjanë" gjatë ndërtimit të hapjes 25-pikëshe */
   stagedGroups: Card[][] = [];
 
-  /** Modal me të gjitha kombinimet e mia në tokë (për të parë pikët e grumbulluara) */
+  /** Renditja ime personale e letrave në dorë (ruhet lokalisht — backend s'e di fare, s'ka ndikim në lojë) */
+  private handOrder: string[] = [];
+  dragFromIndex: number | null = null;
+  dragOverIndex: number | null = null;
+
+  /** Modal me të gjitha kombinimet e mia / të kundërshtarit në tokë (për të parë pikët e grumbulluara) */
   showMyMeldsModal = false;
+  showOpponentMeldsModal = false;
+
+  // ---- Animacione: qartësi vizuale kur tërhiqet/hidhet një letër ----
+  talonPulse = false;
+  justDiscardedPulse = false;
+  justDrewCardIndex: number | null = null;
+  private drawPulseTimer: ReturnType<typeof setTimeout> | null = null;
+  private discardPulseTimer: ReturnType<typeof setTimeout> | null = null;
+  private talonPulseTimer: ReturnType<typeof setTimeout> | null = null;
 
   // ---- Ekrani i hyrjes (para lidhjes WebSocket) ----
   joined = false;
@@ -54,8 +68,12 @@ export class PeseqindshBoardComponent implements OnInit, OnDestroy {
     }
     this.subs.push(
       this.ws.state$.subscribe((s) => {
+        if (s) this.detectDrawAndDiscard(this.state, s);
         this.state = s;
-        if (s) this.syncLobbyCountdown(s);
+        if (s) {
+          this.syncLobbyCountdown(s);
+          this.reconcileHandOrder(s.players.find((p) => p.id === this.ws.myPlayerId)?.myHand ?? []);
+        }
         this.cdr.markForCheck();
       }),
       this.ws.errors$.subscribe((msg) => this.showError(msg)),
@@ -66,7 +84,35 @@ export class PeseqindshBoardComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.subs.forEach((s) => s.unsubscribe());
     if (this.lobbyCountdownTimer) clearInterval(this.lobbyCountdownTimer);
+    if (this.drawPulseTimer) clearTimeout(this.drawPulseTimer);
+    if (this.discardPulseTimer) clearTimeout(this.discardPulseTimer);
+    if (this.talonPulseTimer) clearTimeout(this.talonPulseTimer);
     if (this.joined) this.ws.disconnect();
+  }
+
+  /** Krahason gjendjen e vjetër me të renë për të nxjerrë në pah vizualisht tërheqjen/hedhjen e një letre */
+  private detectDrawAndDiscard(prev: PeseqindshStateView | null, next: PeseqindshStateView): void {
+    if (!prev) return;
+
+    if (next.closedPileCount < prev.closedPileCount) {
+      this.talonPulse = true;
+      if (this.talonPulseTimer) clearTimeout(this.talonPulseTimer);
+      this.talonPulseTimer = setTimeout(() => { this.talonPulse = false; this.cdr.markForCheck(); }, 500);
+
+      const prevMe = prev.players.find((p) => p.id === this.ws.myPlayerId);
+      const nextMe = next.players.find((p) => p.id === this.ws.myPlayerId);
+      if (prevMe && nextMe && nextMe.cardsInHand > prevMe.cardsInHand) {
+        this.justDrewCardIndex = nextMe.cardsInHand - 1;
+        if (this.drawPulseTimer) clearTimeout(this.drawPulseTimer);
+        this.drawPulseTimer = setTimeout(() => { this.justDrewCardIndex = null; this.cdr.markForCheck(); }, 900);
+      }
+    }
+
+    if (next.discardHistory.length > prev.discardHistory.length) {
+      this.justDiscardedPulse = true;
+      if (this.discardPulseTimer) clearTimeout(this.discardPulseTimer);
+      this.discardPulseTimer = setTimeout(() => { this.justDiscardedPulse = false; this.cdr.markForCheck(); }, 700);
+    }
   }
 
   /** Nis/ndal numërimin mbrapsht të lobby-t sipas fazës aktuale të lojës */
@@ -124,16 +170,18 @@ export class PeseqindshBoardComponent implements OnInit, OnDestroy {
   }
 
   get myHandCards(): Card[] {
-    return (this.me?.myHand ?? []).map(parseCardLabel);
+    return this.handOrder.map(parseCardLabel);
+  }
+
+  /** Ruaj renditjen e letrave t'i ekzistueshme, shto në fund letrat e reja, hiq ato që s'janë më në dorë */
+  private reconcileHandOrder(newLabels: string[]): void {
+    const stillPresent = this.handOrder.filter((l) => newLabels.includes(l));
+    const newlyAdded = newLabels.filter((l) => !this.handOrder.includes(l));
+    this.handOrder = [...stillPresent, ...newlyAdded];
   }
 
   get isMyTurn(): boolean {
     return !!this.me && this.state?.currentPlayerSeat === this.me.seatIndex;
-  }
-
-  get topOfOpenPile(): string | null {
-    const pile = this.state?.openPile ?? [];
-    return pile.length ? pile[pile.length - 1] : null;
   }
 
   /** Kthen string letre (nga meld ose openPile) në {suit, rank} për <app-playing-card> */
@@ -151,6 +199,10 @@ export class PeseqindshBoardComponent implements OnInit, OnDestroy {
 
   get myMeldsTotalPoints(): number {
     return this.myMelds.reduce((sum, m) => sum + m.points, 0);
+  }
+
+  get opponentMeldsTotalPoints(): number {
+    return this.opponentMelds.reduce((sum, m) => sum + m.points, 0);
   }
 
   get stagedTotalPoints(): number {
@@ -173,6 +225,11 @@ export class PeseqindshBoardComponent implements OnInit, OnDestroy {
       && (this.state?.openPile.length ?? 0) > 0;
   }
 
+  /** Njësoj si canTakeOpenPile, por për marrjen e pjesshme duke filluar te një letër specifike */
+  get canTakeFromOpenPile(): boolean {
+    return this.canTakeOpenPile;
+  }
+
   get canAddSelectedAsMeld(): boolean {
     return this.isMyTurn && !!this.me?.hasOpened && this.selectedCards.length >= 3;
   }
@@ -185,11 +242,6 @@ export class PeseqindshBoardComponent implements OnInit, OnDestroy {
   get canEndForcedTurn(): boolean {
     return this.isMyTurn && !!this.state?.tookOpenPileThisTurn
       && (this.state?.pendingForcedCards.length ?? 0) === 0;
-  }
-
-  /** Letrat e hedhura që nga fillimi i raundit, si karta {suit,rank} për historikun në qendër të ekranit */
-  get discardHistoryCards(): Card[] {
-    return (this.state?.discardHistory ?? []).map(parseCardLabel);
   }
 
   // ============================================================
@@ -206,6 +258,46 @@ export class PeseqindshBoardComponent implements OnInit, OnDestroy {
     } else {
       this.selectedCards = [...this.selectedCards, card];
     }
+  }
+
+  // ============================================================
+  //  RIRENDITJA E DORËS (drag & drop, vetëm lokale — s'prek gjendjen e lojës)
+  // ============================================================
+
+  onHandDragStart(index: number, event: DragEvent): void {
+    this.dragFromIndex = index;
+    event.dataTransfer?.setData('text/plain', String(index));
+    if (event.dataTransfer) event.dataTransfer.effectAllowed = 'move';
+  }
+
+  onHandDragOver(index: number, event: DragEvent): void {
+    event.preventDefault(); // e domosdoshme që të lejohet 'drop'
+    if (this.dragOverIndex !== index) {
+      this.dragOverIndex = index;
+      this.cdr.markForCheck();
+    }
+  }
+
+  onHandDrop(index: number, event: DragEvent): void {
+    event.preventDefault();
+    const from = this.dragFromIndex;
+    this.dragFromIndex = null;
+    this.dragOverIndex = null;
+    if (from === null || from === index) {
+      this.cdr.markForCheck();
+      return;
+    }
+    const reordered = [...this.handOrder];
+    const [moved] = reordered.splice(from, 1);
+    reordered.splice(index, 0, moved);
+    this.handOrder = reordered;
+    this.cdr.markForCheck();
+  }
+
+  onHandDragEnd(): void {
+    this.dragFromIndex = null;
+    this.dragOverIndex = null;
+    this.cdr.markForCheck();
   }
 
   // ============================================================
@@ -226,6 +318,12 @@ export class PeseqindshBoardComponent implements OnInit, OnDestroy {
   onTakeOpenPile(): void {
     if (!this.canTakeOpenPile) return;
     this.ws.takeOpenPile();
+  }
+
+  /** Klikimi mbi një letër specifike në tokë: merr atë letër + të gjitha mbi të, deri në maja */
+  onTakeFromOpenPile(card: Card): void {
+    if (!this.canTakeFromOpenPile) return;
+    this.ws.takeFromOpenPile(card);
   }
 
   /** Shton grupin e zgjedhur te lista e "hapjes" (mund të bësh disa grupe para se të dërgosh) */
@@ -278,6 +376,10 @@ export class PeseqindshBoardComponent implements OnInit, OnDestroy {
 
   toggleMyMeldsModal(): void {
     this.showMyMeldsModal = !this.showMyMeldsModal;
+  }
+
+  toggleOpponentMeldsModal(): void {
+    this.showOpponentMeldsModal = !this.showOpponentMeldsModal;
   }
 
   private showError(msg: string): void {

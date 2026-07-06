@@ -79,35 +79,43 @@
 .meld app-playing-card { margin-left: -14px; }
 .meld app-playing-card:first-child { margin-left: 0; }
 
-.center-row { display: flex; gap: 28px; align-items: center; margin: 8px 0; }
+.center-row { display: flex; gap: 28px; align-items: flex-start; justify-content: center; flex-wrap: wrap; margin: 8px 0; }
 .pile { display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: default; }
 .pile.active { cursor: pointer; }
 .pile.active app-playing-card { filter: drop-shadow(0 6px 16px rgba(193,110,81,0.35)); }
 .pile-label { font-size: 12px; color: var(--color-text-muted); font-weight: var(--weight-regular); }
 .pile-label em { display: block; font-size: 10px; font-style: normal; opacity: 0.8; }
 
-.discard-history {
-  width: 100%;
-  max-width: 520px;
-  background: var(--color-surface);
-  border-radius: var(--radius-lg);
-  padding: 10px 16px;
-  text-align: center;
-  box-shadow: var(--shadow-soft);
-}
-.history-label {
-  margin: 0 0 8px;
-  font-size: 11px;
-  color: var(--color-text-muted);
-  font-weight: var(--weight-medium);
-}
-.history-cards {
+.open-pile-area { display: flex; flex-direction: column; align-items: center; gap: 6px; max-width: 460px; }
+.open-pile-cards {
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
   justify-content: center;
-  max-height: 140px;
-  overflow-y: auto;
+  min-height: 56px;
+}
+.open-pile-cards app-playing-card.just-discarded { display: inline-block; animation: discard-drop 0.7s ease; }
+
+/* Numërimi mbrapsht/pulsimi që bën të qartë momentin e tërheqjes së letrës nga Talon-i */
+.pile.closed-pile.pulse app-playing-card { display: inline-block; animation: talon-pulse 0.5s ease; }
+
+/* Letra sapo e tërhequr në dorë — theksohet shkurtimisht */
+.my-hand app-playing-card.just-drawn { display: inline-block; animation: draw-highlight 0.9s ease; }
+
+@keyframes talon-pulse {
+  0% { transform: scale(1); }
+  35% { transform: scale(0.82) translateY(6px); filter: brightness(1.3); }
+  100% { transform: scale(1); }
+}
+@keyframes discard-drop {
+  0% { transform: translateY(-26px) scale(0.7); opacity: 0.3; }
+  60% { transform: translateY(4px) scale(1.05); opacity: 1; }
+  100% { transform: translateY(0) scale(1); }
+}
+@keyframes draw-highlight {
+  0% { transform: translateY(-30px) scale(0.7); filter: drop-shadow(0 0 10px var(--color-accent)); }
+  60% { transform: translateY(4px) scale(1.08); }
+  100% { transform: translateY(0) scale(1); }
 }
 
 .modal-overlay {
@@ -196,8 +204,10 @@
 .confirm-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
 .my-hand { flex-wrap: wrap; }
-.my-hand app-playing-card { margin-left: -18px; }
+.my-hand app-playing-card { margin-left: -18px; cursor: grab; transition: transform 0.15s ease, opacity 0.15s ease; }
 .my-hand app-playing-card:first-child { margin-left: 0; }
+.my-hand app-playing-card.dragging { opacity: 0.35; }
+.my-hand app-playing-card.drag-over { transform: translateY(-10px); }
 
 .action-bar { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 10px; }
 .action-bar button {

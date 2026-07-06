@@ -155,6 +155,12 @@ public class PeseqindshController {
         act(roomId, msg.getPlayerId(), gameService::takeOpenPile);
     }
 
+    @MessageMapping("/peseqindsh/takeFromOpenPile/{roomId}")
+    public void takeFromOpenPile(@DestinationVariable String roomId, @Payload PeseqindshMoveMessage msg) {
+        act(roomId, msg.getPlayerId(), (state, player) ->
+                gameService.takeFromOpenPile(state, player, msg.getCard().toCard()));
+    }
+
     @MessageMapping("/peseqindsh/endForcedTurn/{roomId}")
     public void endForcedTurn(@DestinationVariable String roomId, @Payload PeseqindshMoveMessage msg) {
         act(roomId, msg.getPlayerId(), gameService::endForcedTurn);

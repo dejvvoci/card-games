@@ -69,6 +69,11 @@ export class PeseqindshWebSocketService {
     this.send('takeOpenPile', {});
   }
 
+  /** Merr letrat nga toka duke filluar te një letër specifike (dhe të gjitha mbi të, deri në maja) */
+  takeFromOpenPile(fromCard: Card): void {
+    this.send('takeFromOpenPile', { card: fromCard });
+  }
+
   /** Konfirmon që të gjitha letrat e marra nga toka u përdorën në kombinime */
   endForcedTurn(): void {
     this.send('endForcedTurn', {});

@@ -320,6 +320,30 @@ public class PeseqindshService {
         // pastaj thirret endForcedTurn().
     }
 
+    /**
+     * Hap 2 (variant C - vetëm nëse je i shtruar): merr letrat nga toka duke filluar te një letër
+     * specifike e zgjedhur (dhe të gjitha letrat mbi të, deri në maja) — jo domosdoshmërisht të gjitha.
+     * Vetëm letra e zgjedhur (jo gjithë grupi i marrë) duhet përdorur patjetër në një kombinim.
+     */
+    public void takeFromOpenPile(PeseqindshState state, PeseqindshPlayer player, Card fromCard) {
+        requireDiscardedFirst(state, player);
+        if (!player.isHasOpened()) {
+            throw new IllegalStateException("Vetëm një lojtar i shtruar mund të marrë letra nga toka.");
+        }
+        int idx = state.getOpenPile().indexOf(fromCard);
+        if (idx == -1) {
+            throw new IllegalStateException("Kjo letër nuk ndodhet në tokë.");
+        }
+        List<Card> taken = new ArrayList<>(state.getOpenPile().subList(idx, state.getOpenPile().size()));
+        for (int i = state.getOpenPile().size() - 1; i >= idx; i--) {
+            state.getOpenPile().remove(i);
+        }
+        player.getHand().addAll(taken);
+        state.getPendingForcedCards().clear();
+        state.getPendingForcedCards().add(fromCard); // vetëm letra e zgjedhur duhet përdorur patjetër
+        state.setTookOpenPileThisTurn(true);
+    }
+
     /** Thirret pasi lojtari ka përdorur të gjitha letrat 'pending' nga takeOpenPile */
     public void endForcedTurn(PeseqindshState state, PeseqindshPlayer player) {
         if (state.getCurrentPlayerSeat() != player.getSeatIndex()) {
