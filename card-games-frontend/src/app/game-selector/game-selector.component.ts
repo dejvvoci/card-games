@@ -1,7 +1,9 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { AuthService } from '../auth/auth.service';
 import { AuthWidgetComponent } from '../auth/auth-widget/auth-widget.component';
+import { StatsPageComponent } from '../stats/stats-page.component';
 
 interface GameOption {
   id: string;
@@ -14,46 +16,69 @@ interface GameOption {
   tilt: number;          // rrotullim i lehtë si letra e shpërndara në tavolinë
 }
 
+type Tab = 'games' | 'stats';
+
 @Component({
   selector: 'app-game-selector',
   standalone: true,
-  imports: [CommonModule, AuthWidgetComponent],
+  imports: [CommonModule, AuthWidgetComponent, StatsPageComponent],
   template: `
-    <div class="lobby">
+    <!-- I palogur: faqe krejtësisht e izoluar, vetëm hyrje/regjistrim — asnjë lojë s'shfaqet -->
+    <div class="lobby auth-gate" *ngIf="!auth.username()">
       <p class="eyebrow">Trashëgimi shqiptare, e rimenduar</p>
-      <h1>Zgjidh letrën tënde</h1>
-      <p class="subtitle">Çdo lojë është një tavolinë e vetën — kliko kartën për të hyrë.</p>
-
+      <h1>Hyr për të luajtur</h1>
+      <p class="subtitle">Krijo llogari ose hyr për të parë lojërat dhe historikun tënd.</p>
       <app-auth-widget></app-auth-widget>
+    </div>
 
-      <div class="card-spread">
-        <div
-          class="game-card"
-          [class.accent-primary]="g.accent==='primary'"
-          [class.accent-accent]="g.accent==='accent'"
-          [style.transform]="'rotate(' + g.tilt + 'deg)'"
-          *ngFor="let g of games"
-          (click)="play(g)">
-
-          <div class="corner corner-top">
-            <span class="corner-label">{{ g.cornerLabel }}</span>
-            <span class="corner-icon">{{ g.centerIcon }}</span>
-          </div>
-
-          <div class="card-center">
-            <span class="center-icon">{{ g.centerIcon }}</span>
-            <h2>{{ g.name }}</h2>
-            <p>{{ g.description }}</p>
-          </div>
-
-          <div class="corner corner-bottom">
-            <span class="corner-label">{{ g.cornerLabel }}</span>
-            <span class="corner-icon">{{ g.centerIcon }}</span>
-          </div>
-
-          <button class="cta-btn" type="button">Luaj tani →</button>
-        </div>
+    <!-- I loguar: shiriti i llogarisë + skedat Lojërat/Statistikat -->
+    <div class="lobby" *ngIf="auth.username()">
+      <div class="account-bar">
+        <span class="account-name">👤 {{ auth.username() }}</span>
+        <button class="logout-btn" (click)="auth.logout()">Dil</button>
       </div>
+
+      <div class="tab-switcher">
+        <button [class.active]="activeTab==='games'" (click)="activeTab='games'">Lojërat</button>
+        <button [class.active]="activeTab==='stats'" (click)="activeTab='stats'">Statistikat</button>
+      </div>
+
+      <ng-container *ngIf="activeTab==='games'">
+        <p class="eyebrow">Trashëgimi shqiptare, e rimenduar</p>
+        <h1>Zgjidh letrën tënde</h1>
+        <p class="subtitle">Çdo lojë është një tavolinë e vetën — kliko kartën për të hyrë.</p>
+
+        <div class="card-spread">
+          <div
+            class="game-card"
+            [class.accent-primary]="g.accent==='primary'"
+            [class.accent-accent]="g.accent==='accent'"
+            [style.transform]="'rotate(' + g.tilt + 'deg)'"
+            *ngFor="let g of games"
+            (click)="play(g)">
+
+            <div class="corner corner-top">
+              <span class="corner-label">{{ g.cornerLabel }}</span>
+              <span class="corner-icon">{{ g.centerIcon }}</span>
+            </div>
+
+            <div class="card-center">
+              <span class="center-icon">{{ g.centerIcon }}</span>
+              <h2>{{ g.name }}</h2>
+              <p>{{ g.description }}</p>
+            </div>
+
+            <div class="corner corner-bottom">
+              <span class="corner-label">{{ g.cornerLabel }}</span>
+              <span class="corner-icon">{{ g.centerIcon }}</span>
+            </div>
+
+            <button class="cta-btn" type="button">Luaj tani →</button>
+          </div>
+        </div>
+      </ng-container>
+
+      <app-stats-page *ngIf="activeTab==='stats'"></app-stats-page>
     </div>
   `,
   styles: [`
@@ -66,6 +91,55 @@ interface GameOption {
       font-family: var(--font-body);
       box-sizing: border-box;
     }
+    .auth-gate { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .auth-gate .subtitle { max-width: 420px; margin-left: auto; margin-right: auto; }
+    .auth-gate app-auth-widget { margin-top: 32px; width: 100%; max-width: 320px; }
+
+    .account-bar {
+      max-width: 640px;
+      margin: 0 auto 20px;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 12px;
+    }
+    .account-name { font-weight: var(--weight-semibold); font-size: 14px; }
+    .logout-btn {
+      font-family: var(--font-body);
+      font-size: 12px;
+      font-weight: var(--weight-semibold);
+      padding: 6px 14px;
+      border-radius: var(--radius-pill);
+      border: 1.5px solid var(--color-border-strong);
+      background: transparent;
+      color: var(--color-text-muted);
+      cursor: pointer;
+    }
+
+    .tab-switcher {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 40px;
+    }
+    .tab-switcher button {
+      font-family: var(--font-body);
+      font-size: 14px;
+      font-weight: var(--weight-semibold);
+      padding: 10px 22px;
+      border-radius: var(--radius-pill);
+      border: 1.5px solid var(--color-border-strong);
+      background: var(--color-surface);
+      color: var(--color-text);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .tab-switcher button.active {
+      background: var(--color-accent);
+      color: var(--color-text-on-accent);
+      border-color: var(--color-accent);
+    }
+
     .eyebrow {
       font-size: 13px;
       letter-spacing: 0.06em;
@@ -187,6 +261,8 @@ interface GameOption {
 })
 export class GameSelectorComponent {
 
+  activeTab: Tab = 'games';
+
   // Shto këtu çdo lojë të re: cornerLabel si "vlera" e letrës, centerIcon si simboli i saj.
   games: GameOption[] = [
     {
@@ -211,7 +287,7 @@ export class GameSelectorComponent {
     },
   ];
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, public auth: AuthService) {}
 
   play(game: GameOption): void {
     this.router.navigateByUrl(game.route);
