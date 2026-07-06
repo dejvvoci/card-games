@@ -34,8 +34,6 @@ export interface PeseqindshStateView {
   tookOpenPileThisTurn: boolean;
   closedPileCount: number;
   openPile: string[];
-  /** Historiku i PLOTË i letrave të hedhura këtë raund, që nga fillimi (s'zvogëlohet kurrë si openPile) */
-  discardHistory: string[];
   /** Letrat e marra nga toka që ende duhen përdorur në kombinime para se radha të kalojë */
   pendingForcedCards: string[];
   melds: MeldView[];

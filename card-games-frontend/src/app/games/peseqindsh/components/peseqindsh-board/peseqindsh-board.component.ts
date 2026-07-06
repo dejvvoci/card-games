@@ -108,7 +108,7 @@ export class PeseqindshBoardComponent implements OnInit, OnDestroy {
       }
     }
 
-    if (next.discardHistory.length > prev.discardHistory.length) {
+    if (!prev.discardedThisTurn && next.discardedThisTurn) {
       this.justDiscardedPulse = true;
       if (this.discardPulseTimer) clearTimeout(this.discardPulseTimer);
       this.discardPulseTimer = setTimeout(() => { this.justDiscardedPulse = false; this.cdr.markForCheck(); }, 700);

@@ -276,7 +276,6 @@ public class PeseqindshService {
             throw new IllegalStateException("Nuk e ke këtë letër në dorë.");
         }
         state.getOpenPile().add(card);
-        state.getDiscardHistory().add(card);
         state.setDiscardedThisTurn(true);
 
         if (player.isHandEmpty()) {

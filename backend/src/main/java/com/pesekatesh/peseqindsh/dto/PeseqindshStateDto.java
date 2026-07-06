@@ -17,9 +17,7 @@ public class PeseqindshStateDto {
     public boolean discardedThisTurn;
     public boolean tookOpenPileThisTurn;
     public int closedPileCount;
-    public List<String> openPile;         // letrat e hapura, të gjitha të dukshme
-    /** Historiku i PLOTË i letrave të hedhura këtë raund, që nga fillimi (s'zvogëlohet kurrë si openPile) */
-    public List<String> discardHistory;
+    public List<String> openPile;         // letrat e hedhura, të gjitha të dukshme
     /** Letrat e marra nga toka që ende duhen përdorur në kombinime para se radha të kalojë */
     public List<String> pendingForcedCards;
     public List<MeldView> melds = new ArrayList<>();
@@ -58,7 +56,6 @@ public class PeseqindshStateDto {
         dto.tookOpenPileThisTurn = state.isTookOpenPileThisTurn();
         dto.closedPileCount = state.getClosedPile().size();
         dto.openPile = state.getOpenPile().stream().map(Card::toString).collect(Collectors.toList());
-        dto.discardHistory = state.getDiscardHistory().stream().map(Card::toString).collect(Collectors.toList());
         dto.pendingForcedCards = state.getPendingForcedCards().stream().map(Card::toString).collect(Collectors.toList());
         dto.lobbyDeadlineEpochMs = state.getLobbyDeadlineEpochMs();
 

@@ -23,11 +23,8 @@ public class PeseqindshState {
     private final AtomicBoolean resultsRecorded = new AtomicBoolean(false);
 
     private Deque<Card> closedPile = new ArrayDeque<>();  // Talon (grumbulli i mbyllur)
-    private List<Card> openPile = new ArrayList<>();       // letrat e hapura/prera (fundi i listës = maja)
+    private List<Card> openPile = new ArrayList<>();       // letrat e hedhura, të gjitha të dukshme (fundi i listës = maja)
     private List<Meld> melds = new ArrayList<>();          // kombinimet e shtruara nga të dy lojtarët
-
-    /** Historiku i PLOTË i letrave të hedhura këtë raund, që nga fillimi — s'pastrohet kurrë nga toka (ndryshe nga openPile) */
-    private List<Card> discardHistory = new ArrayList<>();
 
     private int currentPlayerSeat;
     private int cutterSeat = 0; // kush ka të drejtë të presë letrat për raundin aktual
@@ -62,7 +59,6 @@ public class PeseqindshState {
     public int getCutterSeat() { return cutterSeat; }
     public void setCutterSeat(int s) { this.cutterSeat = s; }
     public List<Card> getPendingForcedCards() { return pendingForcedCards; }
-    public List<Card> getDiscardHistory() { return discardHistory; }
     public boolean isDiscardedThisTurn() { return discardedThisTurn; }
     public void setDiscardedThisTurn(boolean v) { this.discardedThisTurn = v; }
     public boolean isTookOpenPileThisTurn() { return tookOpenPileThisTurn; }
@@ -102,7 +98,6 @@ public class PeseqindshState {
         openPile.clear();
         melds.clear();
         pendingForcedCards.clear();
-        discardHistory.clear();
         discardedThisTurn = false;
         tookOpenPileThisTurn = false;
         for (PeseqindshPlayer p : players) {
