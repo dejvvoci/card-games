@@ -1,12 +1,20 @@
 package com.pesekatesh.model;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class GameState {
 
     private String roomId;
     private List<Player> players = new ArrayList<>();   // gjithmonë 4, radhitur sipas seatIndex
     private GamePhase phase = GamePhase.WAITING_FOR_PLAYERS;
+
+    /** Sa kohë (ms) pas hapjes së dhomës, vendet bosh mbushen automatikisht me BOT */
+    public static final long LOBBY_BOT_FILL_MS = 60_000;
+
+    /** Momenti (epoch ms) kur dhoma u bë e aksesueshme nga lojtarët; LOBBY_BOT_FILL_MS pas kësaj, vendet bosh mbushen me BOT */
+    private long lobbyDeadlineEpochMs = System.currentTimeMillis() + LOBBY_BOT_FILL_MS;
+    private final AtomicBoolean lobbyTimerScheduled = new AtomicBoolean(false);
 
     // ---- KATE 1-4 (trick taking) ----
     private int currentPlayerIndex;
@@ -45,6 +53,10 @@ public class GameState {
     public List<Player> getPlayers() { return players; }
     public GamePhase getPhase() { return phase; }
     public void setPhase(GamePhase phase) { this.phase = phase; }
+    public long getLobbyDeadlineEpochMs() { return lobbyDeadlineEpochMs; }
+
+    /** Rikthen true vetëm herën e parë që thirret (thread-safe) — përdoret për të planifikuar një herë të vetme mbushjen me BOT */
+    public boolean markLobbyTimerScheduled() { return lobbyTimerScheduled.compareAndSet(false, true); }
     public int getCurrentPlayerIndex() { return currentPlayerIndex; }
     public void setCurrentPlayerIndex(int i) { this.currentPlayerIndex = i; }
     public Suit getLedSuit() { return ledSuit; }

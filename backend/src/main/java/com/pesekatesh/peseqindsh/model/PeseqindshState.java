@@ -3,15 +3,23 @@ package com.pesekatesh.peseqindsh.model;
 import com.pesekatesh.model.Card;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class PeseqindshState {
 
     public static final int TARGET_SCORE = 500;
     public static final int OPENING_THRESHOLD = 25;
 
+    /** Sa kohë (ms) pas hapjes së dhomës, vendi bosh mbushet automatikisht me BOT */
+    public static final long LOBBY_BOT_FILL_MS = 60_000;
+
     private String roomId;
     private List<PeseqindshPlayer> players = new ArrayList<>(); // gjithmonë 2
     private PeseqindshPhase phase = PeseqindshPhase.WAITING_FOR_PLAYERS;
+
+    /** Momenti (epoch ms) kur dhoma u bë e aksesueshme nga lojtarët; LOBBY_BOT_FILL_MS pas kësaj, vendi bosh mbushet me BOT */
+    private long lobbyDeadlineEpochMs = System.currentTimeMillis() + LOBBY_BOT_FILL_MS;
+    private final AtomicBoolean lobbyTimerScheduled = new AtomicBoolean(false);
 
     private Deque<Card> closedPile = new ArrayDeque<>();  // Talon (grumbulli i mbyllur)
     private List<Card> openPile = new ArrayList<>();       // letrat e hapura/prera (fundi i listës = maja)
@@ -51,6 +59,10 @@ public class PeseqindshState {
     public void setDiscardedThisTurn(boolean v) { this.discardedThisTurn = v; }
     public int getRoundNumber() { return roundNumber; }
     public void setRoundNumber(int r) { this.roundNumber = r; }
+    public long getLobbyDeadlineEpochMs() { return lobbyDeadlineEpochMs; }
+
+    /** Rikthen true vetëm herën e parë që thirret (thread-safe) — përdoret për të planifikuar një herë të vetme mbushjen me BOT */
+    public boolean markLobbyTimerScheduled() { return lobbyTimerScheduled.compareAndSet(false, true); }
 
     public PeseqindshPlayer getPlayerBySeat(int seat) {
         return players.stream().filter(p -> p.getSeatIndex() == seat).findFirst().orElse(null);

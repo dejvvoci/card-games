@@ -48,21 +48,48 @@ public class GameController {
 
         // SOLO MODE: plotëso menjëherë me 3 bot-e
         if (msg.isSoloVsBots()) {
-            while (state.getPlayers().size() < 4) {
-                int seat = state.getPlayers().size();
-                state.getPlayers().add(new Player("bot-" + UUID.randomUUID(), "Bot " + seat, true, seat));
-            }
+            fillRemainingSeatsWithBots(state);
+        } else {
+            // MULTIPLAYER: nëse brenda 60s nga hapja e dhomës vendet s'plotësohen me lojtarë të vërtetë,
+            // plotësohen automatikisht me BOT dhe loja fillon
+            scheduleLobbyBotFillIfNeeded(session);
         }
 
         broadcastState(state);
+        startMatchIfReady(session);
+    }
 
-        // Kur dhoma është plot (4 lojtarë), fillo lojën
+    /** Plotëson vendet bosh të mbetura me BOT (deri në 4 lojtarë) */
+    private void fillRemainingSeatsWithBots(GameState state) {
+        while (state.getPlayers().size() < 4) {
+            int seat = state.getPlayers().size();
+            state.getPlayers().add(new Player("bot-" + UUID.randomUUID(), "Bot " + seat, true, seat));
+        }
+    }
+
+    /** Kur dhoma është plot (4 lojtarë, real ose BOT), fillo lojën nëse ende s'ka filluar */
+    private void startMatchIfReady(GameSession session) {
+        GameState state = session.getState();
         if (session.isFull() && state.getPhase() == GamePhase.WAITING_FOR_PLAYERS) {
             state.setRoundNumber(1);
             gameService.dealNewRound(state, 0);
             broadcastState(state);
             triggerBotTurnIfNeeded(session);
         }
+    }
+
+    /** Planifikon, vetëm një herë për këtë dhomë, mbushjen me BOT pas LOBBY_BOT_FILL_SECONDS */
+    private void scheduleLobbyBotFillIfNeeded(GameSession session) {
+        GameState state = session.getState();
+        if (!state.markLobbyTimerScheduled()) return; // tashmë e planifikuar
+
+        long delayMs = Math.max(0, state.getLobbyDeadlineEpochMs() - System.currentTimeMillis());
+        botScheduler.schedule(() -> {
+            if (state.getPhase() != GamePhase.WAITING_FOR_PLAYERS) return; // loja tashmë filloi vetë
+            fillRemainingSeatsWithBots(state);
+            broadcastState(state);
+            startMatchIfReady(session);
+        }, delayMs, TimeUnit.MILLISECONDS);
     }
 
     // ============================================================
@@ -162,7 +189,6 @@ public class GameController {
     // ============================================================
     private void triggerBotTurnIfNeeded(GameSession session) {
         GameState state = session.getState();
-        if (!session.isSoloMode()) return;
         if (state.getPhase() != GamePhase.KATE_1_4 && state.getPhase() != GamePhase.KATI_5_SHTATAT) return;
 
         // Rasti i veçantë: dikush është i bllokuar te Shtatat -> vetë dhënësi (mund të jetë bot) transferon

@@ -11,18 +11,25 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
 import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 @Controller
 public class PeseqindshController {
 
     private final PeseqindshRoomManager roomManager;
     private final PeseqindshService gameService;
+    private final PeseqindshBotService botService;
     private final SimpMessagingTemplate messagingTemplate;
+    private final ScheduledExecutorService botScheduler = Executors.newSingleThreadScheduledExecutor();
 
     public PeseqindshController(PeseqindshRoomManager roomManager, PeseqindshService gameService,
-                                 SimpMessagingTemplate messagingTemplate) {
+                                 PeseqindshBotService botService, SimpMessagingTemplate messagingTemplate) {
         this.roomManager = roomManager;
         this.gameService = gameService;
+        this.botService = botService;
         this.messagingTemplate = messagingTemplate;
     }
 
@@ -36,12 +43,61 @@ public class PeseqindshController {
             int seat = state.getPlayers().size();
             state.getPlayers().add(new PeseqindshPlayer(msg.getPlayerId(), msg.getUsername(), seat));
         }
-        broadcastState(state);
 
+        // Nëse brenda 60s nga hapja e dhomës vendi tjetër s'plotësohet me lojtar të vërtetë,
+        // plotësohet automatikisht me BOT dhe loja fillon
+        scheduleLobbyBotFillIfNeeded(session);
+
+        broadcastState(state);
+        startMatchIfReady(session);
+    }
+
+    /** Plotëson vendin bosh të mbetur me BOT (deri në 2 lojtarë) */
+    private void fillRemainingSeatsWithBots(PeseqindshState state) {
+        while (state.getPlayers().size() < 2) {
+            int seat = state.getPlayers().size();
+            state.getPlayers().add(new PeseqindshPlayer("bot-" + UUID.randomUUID(), "Bot " + seat, seat, true));
+        }
+    }
+
+    /** Kur dhoma është plot (2 lojtarë, real ose BOT), fillo lojën nëse ende s'ka filluar */
+    private void startMatchIfReady(PeseqindshSession session) {
+        PeseqindshState state = session.getState();
         if (session.isFull() && state.getPhase() == PeseqindshPhase.WAITING_FOR_PLAYERS) {
             gameService.startNewRound(state, 0); // seat 0 pret raundin e parë
             broadcastState(state);
+            triggerBotTurnIfNeeded(session);
         }
+    }
+
+    /** Planifikon, vetëm një herë për këtë dhomë, mbushjen me BOT pas PeseqindshState.LOBBY_BOT_FILL_MS */
+    private void scheduleLobbyBotFillIfNeeded(PeseqindshSession session) {
+        PeseqindshState state = session.getState();
+        if (!state.markLobbyTimerScheduled()) return; // tashmë e planifikuar
+
+        long delayMs = Math.max(0, state.getLobbyDeadlineEpochMs() - System.currentTimeMillis());
+        botScheduler.schedule(() -> {
+            if (state.getPhase() != PeseqindshPhase.WAITING_FOR_PLAYERS) return; // loja tashmë filloi vetë
+            fillRemainingSeatsWithBots(state);
+            broadcastState(state);
+            startMatchIfReady(session);
+        }, delayMs, TimeUnit.MILLISECONDS);
+    }
+
+    /** Nëse është radha e një BOT-i, luan automatikisht pas një vonese të shkurtër */
+    private void triggerBotTurnIfNeeded(PeseqindshSession session) {
+        PeseqindshState state = session.getState();
+        if (state.getPhase() != PeseqindshPhase.PLAYING) return;
+        PeseqindshPlayer current = state.getCurrentPlayer();
+        if (current == null || !current.isBot()) return;
+
+        botScheduler.schedule(() -> {
+            try {
+                botService.playTurn(state, current, gameService);
+            } catch (IllegalStateException ignored) { /* rast tjetërsor, humbi race */ }
+            broadcastState(state);
+            triggerBotTurnIfNeeded(session); // vazhdon nëse edhe radha tjetër është BOT
+        }, 900, TimeUnit.MILLISECONDS);
     }
 
     // ------------------------------------------------------------
@@ -101,6 +157,7 @@ public class PeseqindshController {
                 .map(PeseqindshPlayer::getSeatIndex).orElse(0);
         gameService.startNextRound(state, winnerSeat);
         broadcastState(state);
+        triggerBotTurnIfNeeded(session);
     }
 
     // ------------------------------------------------------------
@@ -124,6 +181,7 @@ public class PeseqindshController {
             return;
         }
         broadcastState(state);
+        triggerBotTurnIfNeeded(session);
     }
 
     private PeseqindshSession requireRoom(String roomId) {

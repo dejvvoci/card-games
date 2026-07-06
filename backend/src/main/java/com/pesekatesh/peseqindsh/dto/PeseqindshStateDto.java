@@ -20,9 +20,13 @@ public class PeseqindshStateDto {
     public List<MeldView> melds = new ArrayList<>();
     public List<PlayerView> players = new ArrayList<>();
 
+    /** Epoch ms kur vendi bosh mbushet automatikisht me BOT, nëse dhoma ende pret lojtar */
+    public long lobbyDeadlineEpochMs;
+
     public static class PlayerView {
         public String id;
         public String username;
+        public boolean bot;
         public int seatIndex;
         public boolean hasOpened;
         public int totalScore;
@@ -47,6 +51,7 @@ public class PeseqindshStateDto {
         dto.discardedThisTurn = state.isDiscardedThisTurn();
         dto.closedPileCount = state.getClosedPile().size();
         dto.openPile = state.getOpenPile().stream().map(Card::toString).collect(Collectors.toList());
+        dto.lobbyDeadlineEpochMs = state.getLobbyDeadlineEpochMs();
 
         for (Meld m : state.getMelds()) {
             MeldView mv = new MeldView();
@@ -61,6 +66,7 @@ public class PeseqindshStateDto {
             PlayerView pv = new PlayerView();
             pv.id = p.getId();
             pv.username = p.getUsername();
+            pv.bot = p.isBot();
             pv.seatIndex = p.getSeatIndex();
             pv.hasOpened = p.isHasOpened();
             pv.totalScore = p.getTotalScore();

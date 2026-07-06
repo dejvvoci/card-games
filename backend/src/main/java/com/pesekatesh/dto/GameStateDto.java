@@ -34,6 +34,9 @@ public class GameStateDto {
     public List<Integer> readySeats = new ArrayList<>();
     public int matchWinnerSeat;
 
+    /** Epoch ms kur vendet bosh mbushen automatikisht me BOT, nëse dhoma ende pret lojtarë */
+    public long lobbyDeadlineEpochMs;
+
     public static class PlayerView {
         public String id;
         public String username;
@@ -72,6 +75,7 @@ public class GameStateDto {
         dto.shtatatEveryRound = state.isShtatatEveryRound();
         dto.tiebreakRound = state.isTiebreakRound();
         dto.matchWinnerSeat = state.getMatchWinnerSeat();
+        dto.lobbyDeadlineEpochMs = state.getLobbyDeadlineEpochMs();
         for (Player p : state.getPlayers()) {
             if (state.getReadyPlayerIds().contains(p.getId())) {
                 dto.readySeats.add(p.getSeatIndex());
