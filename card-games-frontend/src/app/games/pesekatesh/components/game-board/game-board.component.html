@@ -57,6 +57,7 @@
     <div class="player-tag" [class.active-turn]="s.currentPlayerSeat === opp.seatIndex">
       {{ opp.username }} ({{ opp.totalScore }}p) — {{ opp.cardsInHand }} letra
       <span *ngIf="opp.bot" class="bot-badge">BOT</span>
+      <span *ngIf="!opp.bot && voiceChat.getPeerState(opp.id) as vs" class="voice-badge" [class.voice-connected]="vs === 'connected'">{{ vs === 'connected' ? '🎙️' : '⏳' }}</span>
     </div>
     <div class="hand-back">
       <app-playing-card *ngFor="let c of [].constructor(opp.cardsInHand)" [faceDown]="true" [width]="34"></app-playing-card>
@@ -69,6 +70,7 @@
       <div class="player-tag" [class.active-turn]="s.currentPlayerSeat === opp.seatIndex">
         {{ opp.username }} ({{ opp.totalScore }}p)
         <span *ngIf="opp.bot" class="bot-badge">BOT</span>
+      <span *ngIf="!opp.bot && voiceChat.getPeerState(opp.id) as vs" class="voice-badge" [class.voice-connected]="vs === 'connected'">{{ vs === 'connected' ? '🎙️' : '⏳' }}</span>
       </div>
       <div class="hand-back vertical">
         <app-playing-card *ngFor="let c of [].constructor(opp.cardsInHand)" [faceDown]="true" [width]="30"></app-playing-card>
@@ -137,6 +139,7 @@
       <div class="player-tag" [class.active-turn]="s.currentPlayerSeat === opp.seatIndex">
         {{ opp.username }} ({{ opp.totalScore }}p)
         <span *ngIf="opp.bot" class="bot-badge">BOT</span>
+      <span *ngIf="!opp.bot && voiceChat.getPeerState(opp.id) as vs" class="voice-badge" [class.voice-connected]="vs === 'connected'">{{ vs === 'connected' ? '🎙️' : '⏳' }}</span>
       </div>
       <div class="hand-back vertical">
         <app-playing-card *ngFor="let c of [].constructor(opp.cardsInHand)" [faceDown]="true" [width]="30"></app-playing-card>
@@ -169,6 +172,15 @@
 
     <div class="blocked-msg" *ngIf="amIBlocked">Je i bllokuar — pret letër nga lojtari para teje...</div>
     <div class="trade-msg" *ngIf="mustGiveCardToBlocked">👉 Zgjidh një letër për t'ia dhënë lojtarit të bllokuar</div>
+  </div>
+
+  <!-- Zë (audio) mes lojtarëve realë -->
+  <div class="voice-chat-panel">
+    <button *ngIf="!voiceChat.active()" (click)="onJoinVoiceChat()">🎙️ Bashkohu me zë</button>
+    <ng-container *ngIf="voiceChat.active()">
+      <button (click)="voiceChat.toggleMute()">{{ voiceChat.muted() ? '🔇 I heshtur' : '🎙️ Aktiv' }}</button>
+      <button (click)="voiceChat.leave()">Dil nga zëri</button>
+    </ng-container>
   </div>
 
   <!-- Buton + panel i historikut të marrjeve (trick-et e mia në raundin aktual) -->

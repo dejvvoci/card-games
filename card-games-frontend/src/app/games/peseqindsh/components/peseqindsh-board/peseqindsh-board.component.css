@@ -38,6 +38,34 @@
   font-size: 10px;
   margin-left: 6px;
 }
+.voice-badge {
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  padding: 1px 6px;
+  border-radius: var(--radius-pill);
+  font-size: 10px;
+  margin-left: 4px;
+}
+.voice-badge.voice-connected { color: var(--color-accent-deep); }
+.voice-chat-panel {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  display: flex;
+  gap: 8px;
+  z-index: 9;
+}
+.voice-chat-panel button {
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-border-strong);
+  color: var(--color-text);
+  padding: 8px 16px;
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  font-weight: var(--weight-semibold);
+  cursor: pointer;
+  box-shadow: var(--shadow-soft);
+}
 .round-info {
   font-family: var(--font-display);
   font-weight: var(--weight-semibold);

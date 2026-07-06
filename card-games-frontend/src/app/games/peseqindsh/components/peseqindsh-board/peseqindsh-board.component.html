@@ -43,6 +43,7 @@
     <div class="score-box" [class.leading]="opponent && opponent.totalScore >= (me?.totalScore ?? 0)">
       {{ opponent?.username }}: {{ opponent?.totalScore ?? 0 }} p
       <span class="bot-badge" *ngIf="opponent?.bot">BOT</span>
+      <span *ngIf="opponent && !opponent.bot && voiceChat.getPeerState(opponent.id) as vs" class="voice-badge" [class.voice-connected]="vs === 'connected'">{{ vs === 'connected' ? '🎙️' : '⏳' }}</span>
       <span class="opened-tag" *ngIf="opponent?.hasOpened">✓ i shtruar</span>
     </div>
     <div class="round-info">Raundi #{{ s.roundNumber }} — Deri në 500</div>
@@ -153,6 +154,15 @@
     <button class="my-melds-btn" (click)="toggleOpponentMeldsModal()" *ngIf="opponentMelds.length">
       Kombinimet e kundërshtarit ({{ opponentMeldsTotalPoints }}p)
     </button>
+  </div>
+
+  <!-- Zë (audio) mes lojtarëve realë -->
+  <div class="voice-chat-panel">
+    <button *ngIf="!voiceChat.active()" (click)="onJoinVoiceChat()">🎙️ Bashkohu me zë</button>
+    <ng-container *ngIf="voiceChat.active()">
+      <button (click)="voiceChat.toggleMute()">{{ voiceChat.muted() ? '🔇 I heshtur' : '🎙️ Aktiv' }}</button>
+      <button (click)="voiceChat.leave()">Dil nga zëri</button>
+    </ng-container>
   </div>
 
   <!-- FUNDI I RAUNDIT / LOJËS -->

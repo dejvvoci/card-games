@@ -8,6 +8,7 @@ import { PeseqindshStateView, MeldView, PeseqindshPlayerView } from '../../model
 import { Card, SUIT_SYMBOL, SUIT_COLOR, rankLabel, parseCardLabel } from '../../../../models/card.model';
 import { PlayingCardComponent } from '../../../../shared/playing-card/playing-card.component';
 import { AuthService } from '../../../../auth/auth.service';
+import { VoiceChatService } from '../../../../voice/voice-chat.service';
 
 @Component({
   selector: 'app-peseqindsh-board',
@@ -60,7 +61,7 @@ export class PeseqindshBoardComponent implements OnInit, OnDestroy {
   private lobbyCountdownTimer: ReturnType<typeof setInterval> | null = null;
 
   constructor(private ws: PeseqindshWebSocketService, private cdr: ChangeDetectorRef, public auth: AuthService,
-              private router: Router) {}
+              private router: Router, public voiceChat: VoiceChatService) {}
 
   ngOnInit(): void {
     if (this.auth.username()) {
@@ -73,6 +74,7 @@ export class PeseqindshBoardComponent implements OnInit, OnDestroy {
         if (s) {
           this.syncLobbyCountdown(s);
           this.reconcileHandOrder(s.players.find((p) => p.id === this.ws.myPlayerId)?.myHand ?? []);
+          this.voiceChat.syncPeers(s.players.filter((p) => !p.bot).map((p) => p.id));
         }
         this.cdr.markForCheck();
       }),
@@ -87,7 +89,16 @@ export class PeseqindshBoardComponent implements OnInit, OnDestroy {
     if (this.drawPulseTimer) clearTimeout(this.drawPulseTimer);
     if (this.discardPulseTimer) clearTimeout(this.discardPulseTimer);
     if (this.talonPulseTimer) clearTimeout(this.talonPulseTimer);
+    this.voiceChat.leave();
     if (this.joined) this.ws.disconnect();
+  }
+
+  async onJoinVoiceChat(): Promise<void> {
+    try {
+      await this.voiceChat.join(this.ws.myPlayerId);
+    } catch {
+      this.showError('S\'u arrit qasja te mikrofoni. Kontrollo lejet e browser-it.');
+    }
   }
 
   /** Krahason gjendjen e vjetër me të renë për të nxjerrë në pah vizualisht tërheqjen/hedhjen e një letre */

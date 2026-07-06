@@ -8,6 +8,7 @@ import { GameStateView, PlayerView } from '../../models/game-state.model';
 import { Card, SUIT_SYMBOL, SUIT_COLOR, rankLabel, parseCardLabel } from '../../../../models/card.model';
 import { PlayingCardComponent } from '../../../../shared/playing-card/playing-card.component';
 import { AuthService } from '../../../../auth/auth.service';
+import { VoiceChatService } from '../../../../voice/voice-chat.service';
 
 @Component({
   selector: 'app-game-board',
@@ -52,7 +53,7 @@ export class GameBoardComponent implements OnInit, OnDestroy {
   private lobbyCountdownTimer: ReturnType<typeof setInterval> | null = null;
 
   constructor(private ws: GameWebSocketService, private cdr: ChangeDetectorRef, public auth: AuthService,
-              private router: Router) {}
+              private router: Router, public voiceChat: VoiceChatService) {}
 
   ngOnInit(): void {
     if (this.auth.username()) {
@@ -64,6 +65,7 @@ export class GameBoardComponent implements OnInit, OnDestroy {
         if (s) {
           this.handleTrickAnimation(s);
           this.syncLobbyCountdown(s);
+          this.voiceChat.syncPeers(s.players.filter((p) => !p.bot).map((p) => p.id));
         }
         this.cdr.markForCheck();
       }),
@@ -76,7 +78,16 @@ export class GameBoardComponent implements OnInit, OnDestroy {
     this.subs.forEach((s) => s.unsubscribe());
     this.flyTimers.forEach((t) => clearTimeout(t));
     if (this.lobbyCountdownTimer) clearInterval(this.lobbyCountdownTimer);
+    this.voiceChat.leave();
     if (this.joined) this.ws.disconnect();
+  }
+
+  async onJoinVoiceChat(): Promise<void> {
+    try {
+      await this.voiceChat.join(this.ws.myPlayerId);
+    } catch {
+      this.showError('S\'u arrit qasja te mikrofoni. Kontrollo lejet e browser-it.');
+    }
   }
 
   /** Nis/ndal numërimin mbrapsht të lobby-t sipas fazës aktuale të lojës */
