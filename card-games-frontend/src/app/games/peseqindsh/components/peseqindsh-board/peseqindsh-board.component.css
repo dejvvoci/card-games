@@ -30,11 +30,32 @@
 }
 .score-box.leading { background: var(--color-accent); color: var(--color-text-on-accent); border-color: var(--color-accent); }
 .opened-tag { font-size: 11px; margin-left: 6px; opacity: 0.9; font-weight: var(--weight-medium); }
+.bot-badge {
+  background: var(--color-accent-soft);
+  color: var(--color-accent-deep);
+  padding: 1px 8px;
+  border-radius: var(--radius-pill);
+  font-size: 10px;
+  margin-left: 6px;
+}
 .round-info {
   font-family: var(--font-display);
   font-weight: var(--weight-semibold);
   font-size: 14px;
   color: var(--color-accent-deep);
+}
+
+.lobby-banner {
+  text-align: center;
+  font-family: var(--font-body);
+  font-weight: var(--weight-semibold);
+  font-size: 13px;
+  color: var(--color-accent-deep);
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-border-strong);
+  border-radius: var(--radius-pill);
+  padding: 8px 16px;
+  width: fit-content;
 }
 
 .opponent-hand, .my-hand { display: flex; justify-content: center; }

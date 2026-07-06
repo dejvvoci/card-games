@@ -39,4 +39,6 @@ export interface GameStateView {
   tiebreakRound: boolean;
   readySeats: number[];
   matchWinnerSeat: number;
+  /** Epoch ms kur vendet bosh mbushen automatikisht me BOT, nëse dhoma ende pret lojtarë */
+  lobbyDeadlineEpochMs: number;
 }

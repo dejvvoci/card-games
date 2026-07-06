@@ -21,10 +21,19 @@
 
   <div class="error-toast" *ngIf="errorMessage">{{ errorMessage }}</div>
 
+  <!-- Dhoma ende pret lojtarë: vendi bosh mbushet automatikisht me BOT pas numërimit mbrapsht -->
+  <div class="lobby-banner" *ngIf="s.phase === 'WAITING_FOR_PLAYERS'">
+    Duke pritur lojtarin tjetër... {{ s.players.length }}/2
+    <ng-container *ngIf="s.players.length < 2">
+      — vendi bosh plotësohet me BOT për {{ lobbySecondsLeft }}s
+    </ng-container>
+  </div>
+
   <!-- KOKA: skore + info raundi -->
   <div class="score-bar">
     <div class="score-box" [class.leading]="opponent && opponent.totalScore >= (me?.totalScore ?? 0)">
       {{ opponent?.username }}: {{ opponent?.totalScore ?? 0 }} p
+      <span class="bot-badge" *ngIf="opponent?.bot">BOT</span>
       <span class="opened-tag" *ngIf="opponent?.hasOpened">✓ i shtruar</span>
     </div>
     <div class="round-info">Raundi #{{ s.roundNumber }} — Deri në 500</div>

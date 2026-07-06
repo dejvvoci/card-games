@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { AuthWidgetComponent } from '../auth/auth-widget/auth-widget.component';
 
 interface GameOption {
   id: string;
@@ -16,12 +17,14 @@ interface GameOption {
 @Component({
   selector: 'app-game-selector',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, AuthWidgetComponent],
   template: `
     <div class="lobby">
       <p class="eyebrow">Trashëgimi shqiptare, e rimenduar</p>
       <h1>Zgjidh letrën tënde</h1>
       <p class="subtitle">Çdo lojë është një tavolinë e vetën — kliko kartën për të hyrë.</p>
+
+      <app-auth-widget></app-auth-widget>
 
       <div class="card-spread">
         <div

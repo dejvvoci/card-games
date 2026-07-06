@@ -15,6 +15,9 @@ public class PeseqindshPlayer {
     private boolean hasOpened = false; // a ka arritur kuotën 25p dhe është "shtruar"
     private int totalScore = 0;        // pikët kumulative deri në 500
 
+    /** Lidhja me llogarinë e loguar (nëse ka) — përdoret vetëm për të regjistruar historikun e statistikave */
+    private Long userId;
+
     public PeseqindshPlayer() {}
 
     public PeseqindshPlayer(String id, String username, int seatIndex) {
@@ -42,6 +45,8 @@ public class PeseqindshPlayer {
     public void setHasOpened(boolean hasOpened) { this.hasOpened = hasOpened; }
     public int getTotalScore() { return totalScore; }
     public void addScore(int delta) { this.totalScore += delta; }
+    public Long getUserId() { return userId; }
+    public void setUserId(Long userId) { this.userId = userId; }
 
     public boolean isHandEmpty() { return hand.isEmpty(); }
 }

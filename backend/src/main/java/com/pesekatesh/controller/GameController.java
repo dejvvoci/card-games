@@ -3,6 +3,8 @@ package com.pesekatesh.controller;
 import com.pesekatesh.dto.*;
 import com.pesekatesh.model.*;
 import com.pesekatesh.service.*;
+import com.pesekatesh.stats.GameResultService;
+import com.pesekatesh.user.AuthTokenService;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -23,14 +25,19 @@ public class GameController {
     private final GameService gameService;
     private final BotService botService;
     private final SimpMessagingTemplate messagingTemplate;
+    private final AuthTokenService authTokenService;
+    private final GameResultService gameResultService;
     private final ScheduledExecutorService botScheduler = Executors.newSingleThreadScheduledExecutor();
 
     public GameController(RoomManager roomManager, GameService gameService,
-                           BotService botService, SimpMessagingTemplate messagingTemplate) {
+                           BotService botService, SimpMessagingTemplate messagingTemplate,
+                           AuthTokenService authTokenService, GameResultService gameResultService) {
         this.roomManager = roomManager;
         this.gameService = gameService;
         this.botService = botService;
         this.messagingTemplate = messagingTemplate;
+        this.authTokenService = authTokenService;
+        this.gameResultService = gameResultService;
     }
 
     // ============================================================
@@ -43,7 +50,9 @@ public class GameController {
 
         if (state.getPlayers().stream().noneMatch(p -> p.getId().equals(msg.getPlayerId())) && !session.isFull()) {
             int seat = state.getPlayers().size();
-            state.getPlayers().add(new Player(msg.getPlayerId(), msg.getUsername(), false, seat));
+            Player player = new Player(msg.getPlayerId(), msg.getUsername(), false, seat);
+            player.setUserId(authTokenService.resolveUserId(msg.getAuthToken()).orElse(null));
+            state.getPlayers().add(player);
         }
 
         // SOLO MODE: plotëso menjëherë me 3 bot-e
@@ -256,6 +265,11 @@ public class GameController {
         }
         // Version publik (pa asnjë dorë) për ekranin e tavolinës / spektatorë
         messagingTemplate.convertAndSend("/topic/room/" + state.getRoomId(), GameStateDto.from(state, null));
+
+        // Ndeshja sapo mbaroi -> regjistro historikun e statistikave (vetëm një herë) për lojtarët e loguar
+        if (state.getPhase() == GamePhase.GAME_OVER && state.markResultsRecorded()) {
+            gameResultService.recordPesekateshResult(state);
+        }
     }
 
     private void sendPrivateError(String playerId, String message) {

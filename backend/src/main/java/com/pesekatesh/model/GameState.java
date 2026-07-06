@@ -15,6 +15,7 @@ public class GameState {
     /** Momenti (epoch ms) kur dhoma u bë e aksesueshme nga lojtarët; LOBBY_BOT_FILL_MS pas kësaj, vendet bosh mbushen me BOT */
     private long lobbyDeadlineEpochMs = System.currentTimeMillis() + LOBBY_BOT_FILL_MS;
     private final AtomicBoolean lobbyTimerScheduled = new AtomicBoolean(false);
+    private final AtomicBoolean resultsRecorded = new AtomicBoolean(false);
 
     // ---- KATE 1-4 (trick taking) ----
     private int currentPlayerIndex;
@@ -57,6 +58,9 @@ public class GameState {
 
     /** Rikthen true vetëm herën e parë që thirret (thread-safe) — përdoret për të planifikuar një herë të vetme mbushjen me BOT */
     public boolean markLobbyTimerScheduled() { return lobbyTimerScheduled.compareAndSet(false, true); }
+
+    /** Rikthen true vetëm herën e parë që thirret (thread-safe) — siguron që rezultatet regjistrohen një herë të vetme në DB */
+    public boolean markResultsRecorded() { return resultsRecorded.compareAndSet(false, true); }
     public int getCurrentPlayerIndex() { return currentPlayerIndex; }
     public void setCurrentPlayerIndex(int i) { this.currentPlayerIndex = i; }
     public Suit getLedSuit() { return ledSuit; }

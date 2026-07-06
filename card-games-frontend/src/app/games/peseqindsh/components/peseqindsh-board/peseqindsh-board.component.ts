@@ -6,6 +6,7 @@ import { PeseqindshWebSocketService } from '../../services/peseqindsh-websocket.
 import { PeseqindshStateView, MeldView, PeseqindshPlayerView } from '../../models/game-state.model';
 import { Card, SUIT_SYMBOL, SUIT_COLOR, rankLabel, parseCardLabel } from '../../../../models/card.model';
 import { PlayingCardComponent } from '../../../../shared/playing-card/playing-card.component';
+import { AuthService } from '../../../../auth/auth.service';
 
 @Component({
   selector: 'app-peseqindsh-board',
@@ -35,12 +36,20 @@ export class PeseqindshBoardComponent implements OnInit, OnDestroy {
 
   private subs: Subscription[] = [];
 
-  constructor(private ws: PeseqindshWebSocketService, private cdr: ChangeDetectorRef) {}
+  /** Numërim mbrapsht deri sa vendi bosh mbushet automatikisht me BOT (vetëm gjatë WAITING_FOR_PLAYERS) */
+  lobbySecondsLeft = 0;
+  private lobbyCountdownTimer: ReturnType<typeof setInterval> | null = null;
+
+  constructor(private ws: PeseqindshWebSocketService, private cdr: ChangeDetectorRef, public auth: AuthService) {}
 
   ngOnInit(): void {
+    if (this.auth.username()) {
+      this.username = this.auth.username()!;
+    }
     this.subs.push(
       this.ws.state$.subscribe((s) => {
         this.state = s;
+        if (s) this.syncLobbyCountdown(s);
         this.cdr.markForCheck();
       }),
       this.ws.errors$.subscribe((msg) => this.showError(msg)),
@@ -50,7 +59,26 @@ export class PeseqindshBoardComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.subs.forEach((s) => s.unsubscribe());
+    if (this.lobbyCountdownTimer) clearInterval(this.lobbyCountdownTimer);
     if (this.joined) this.ws.disconnect();
+  }
+
+  /** Nis/ndal numërimin mbrapsht të lobby-t sipas fazës aktuale të lojës */
+  private syncLobbyCountdown(s: PeseqindshStateView): void {
+    if (s.phase !== 'WAITING_FOR_PLAYERS') {
+      if (this.lobbyCountdownTimer) {
+        clearInterval(this.lobbyCountdownTimer);
+        this.lobbyCountdownTimer = null;
+      }
+      return;
+    }
+    this.lobbySecondsLeft = Math.max(0, Math.round((s.lobbyDeadlineEpochMs - Date.now()) / 1000));
+    if (!this.lobbyCountdownTimer) {
+      this.lobbyCountdownTimer = setInterval(() => {
+        this.lobbySecondsLeft = Math.max(0, Math.round((s.lobbyDeadlineEpochMs - Date.now()) / 1000));
+        this.cdr.markForCheck();
+      }, 1000);
+    }
   }
 
   generateRoomCode(): string {
@@ -64,7 +92,7 @@ export class PeseqindshBoardComponent implements OnInit, OnDestroy {
   onJoinSubmit(): void {
     if (!this.canJoin) return;
     const playerId = 'p-' + Math.random().toString(36).substring(2, 10);
-    this.ws.connect(this.roomId.trim().toUpperCase(), playerId, this.username.trim());
+    this.ws.connect(this.roomId.trim().toUpperCase(), playerId, this.username.trim(), this.auth.getToken());
     this.joined = true;
   }
 

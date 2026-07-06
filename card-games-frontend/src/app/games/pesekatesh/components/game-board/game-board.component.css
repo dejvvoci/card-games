@@ -199,6 +199,20 @@
   margin-bottom: 6px;
 }
 
+.lobby-banner {
+  text-align: center;
+  font-family: var(--font-body);
+  font-weight: var(--weight-semibold);
+  font-size: 13px;
+  color: var(--color-accent-deep);
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-border-strong);
+  border-radius: var(--radius-pill);
+  padding: 8px 16px;
+  margin: 0 auto 10px;
+  width: fit-content;
+}
+
 .history-toggle-btn {
   position: fixed;
   left: 16px;

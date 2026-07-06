@@ -37,6 +37,14 @@
   <!-- Mesazhi i gabimit -->
   <div class="error-toast" *ngIf="errorMessage">{{ errorMessage }}</div>
 
+  <!-- Dhoma ende pret lojtarë: vendet bosh mbushen automatikisht me BOT pas numërimit mbrapsht -->
+  <div class="lobby-banner" *ngIf="s.phase === 'WAITING_FOR_PLAYERS'">
+    Duke pritur lojtarë... {{ s.players.length }}/4
+    <ng-container *ngIf="s.players.length < 4">
+      — vendet bosh plotësohen me BOT për {{ lobbySecondsLeft }}s
+    </ng-container>
+  </div>
+
   <!-- Info raundi -->
   <div class="round-info">
     <ng-container *ngIf="!s.tiebreakRound">Raundi {{ s.roundNumber }}/{{ s.totalRounds }}</ng-container>

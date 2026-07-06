@@ -4,6 +4,8 @@ import com.pesekatesh.peseqindsh.dto.*;
 import com.pesekatesh.peseqindsh.model.*;
 import com.pesekatesh.peseqindsh.service.*;
 import com.pesekatesh.model.Card;
+import com.pesekatesh.stats.GameResultService;
+import com.pesekatesh.user.AuthTokenService;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -23,14 +25,19 @@ public class PeseqindshController {
     private final PeseqindshService gameService;
     private final PeseqindshBotService botService;
     private final SimpMessagingTemplate messagingTemplate;
+    private final AuthTokenService authTokenService;
+    private final GameResultService gameResultService;
     private final ScheduledExecutorService botScheduler = Executors.newSingleThreadScheduledExecutor();
 
     public PeseqindshController(PeseqindshRoomManager roomManager, PeseqindshService gameService,
-                                 PeseqindshBotService botService, SimpMessagingTemplate messagingTemplate) {
+                                 PeseqindshBotService botService, SimpMessagingTemplate messagingTemplate,
+                                 AuthTokenService authTokenService, GameResultService gameResultService) {
         this.roomManager = roomManager;
         this.gameService = gameService;
         this.botService = botService;
         this.messagingTemplate = messagingTemplate;
+        this.authTokenService = authTokenService;
+        this.gameResultService = gameResultService;
     }
 
     // ------------------------------------------------------------
@@ -41,7 +48,9 @@ public class PeseqindshController {
 
         if (state.getPlayers().stream().noneMatch(p -> p.getId().equals(msg.getPlayerId())) && !session.isFull()) {
             int seat = state.getPlayers().size();
-            state.getPlayers().add(new PeseqindshPlayer(msg.getPlayerId(), msg.getUsername(), seat));
+            PeseqindshPlayer player = new PeseqindshPlayer(msg.getPlayerId(), msg.getUsername(), seat);
+            player.setUserId(authTokenService.resolveUserId(msg.getAuthToken()).orElse(null));
+            state.getPlayers().add(player);
         }
 
         // Nëse brenda 60s nga hapja e dhomës vendi tjetër s'plotësohet me lojtar të vërtetë,
@@ -197,5 +206,10 @@ public class PeseqindshController {
         }
         messagingTemplate.convertAndSend("/topic/peseqindsh/room/" + state.getRoomId(),
                 PeseqindshStateDto.from(state, null));
+
+        // Ndeshja sapo mbaroi -> regjistro historikun e statistikave (vetëm një herë) për lojtarët e loguar
+        if (state.getPhase() == PeseqindshPhase.GAME_OVER && state.markResultsRecorded()) {
+            gameResultService.recordPeseqindshResult(state);
+        }
     }
 }

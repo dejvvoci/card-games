@@ -4,8 +4,9 @@ import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { GameWebSocketService } from '../../services/game-websocket.service';
 import { GameStateView, PlayerView } from '../../models/game-state.model';
-import { Card, SUIT_SYMBOL, SUIT_COLOR, rankLabel, parseCardLabel } from '../../models/card.model';
-import { PlayingCardComponent } from '../../shared/playing-card/playing-card.component';
+import { Card, SUIT_SYMBOL, SUIT_COLOR, rankLabel, parseCardLabel } from '../../../../models/card.model';
+import { PlayingCardComponent } from '../../../../shared/playing-card/playing-card.component';
+import { AuthService } from '../../../../auth/auth.service';
 
 @Component({
   selector: 'app-game-board',
@@ -45,13 +46,23 @@ export class GameBoardComponent implements OnInit, OnDestroy {
 
   private subs: Subscription[] = [];
 
-  constructor(private ws: GameWebSocketService, private cdr: ChangeDetectorRef) {}
+  /** Numërim mbrapsht deri sa vendet bosh mbushen automatikisht me BOT (vetëm gjatë WAITING_FOR_PLAYERS) */
+  lobbySecondsLeft = 0;
+  private lobbyCountdownTimer: ReturnType<typeof setInterval> | null = null;
+
+  constructor(private ws: GameWebSocketService, private cdr: ChangeDetectorRef, public auth: AuthService) {}
 
   ngOnInit(): void {
+    if (this.auth.username()) {
+      this.username = this.auth.username()!;
+    }
     this.subs.push(
       this.ws.gameState$.subscribe((s) => {
         this.state = s;
-        if (s) this.handleTrickAnimation(s);
+        if (s) {
+          this.handleTrickAnimation(s);
+          this.syncLobbyCountdown(s);
+        }
         this.cdr.markForCheck();
       }),
       this.ws.errors$.subscribe((msg) => this.showError(msg)),
@@ -62,7 +73,26 @@ export class GameBoardComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.subs.forEach((s) => s.unsubscribe());
     this.flyTimers.forEach((t) => clearTimeout(t));
+    if (this.lobbyCountdownTimer) clearInterval(this.lobbyCountdownTimer);
     if (this.joined) this.ws.disconnect();
+  }
+
+  /** Nis/ndal numërimin mbrapsht të lobby-t sipas fazës aktuale të lojës */
+  private syncLobbyCountdown(s: GameStateView): void {
+    if (s.phase !== 'WAITING_FOR_PLAYERS') {
+      if (this.lobbyCountdownTimer) {
+        clearInterval(this.lobbyCountdownTimer);
+        this.lobbyCountdownTimer = null;
+      }
+      return;
+    }
+    this.lobbySecondsLeft = Math.max(0, Math.round((s.lobbyDeadlineEpochMs - Date.now()) / 1000));
+    if (!this.lobbyCountdownTimer) {
+      this.lobbyCountdownTimer = setInterval(() => {
+        this.lobbySecondsLeft = Math.max(0, Math.round((s.lobbyDeadlineEpochMs - Date.now()) / 1000));
+        this.cdr.markForCheck();
+      }, 1000);
+    }
   }
 
   // ============================================================
@@ -133,7 +163,8 @@ export class GameBoardComponent implements OnInit, OnDestroy {
     const playerId = 'p-' + Math.random().toString(36).substring(2, 10);
     // Solo: dhomë private e gjeneruar automatikisht (bot-et plotësohen menjëherë nga backend)
     const roomToJoin = this.mode === 'solo' ? 'solo-' + playerId : this.roomId.trim().toUpperCase();
-    this.ws.connect(roomToJoin, playerId, this.username.trim(), this.mode === 'solo', this.shtatatEveryRound);
+    this.ws.connect(roomToJoin, playerId, this.username.trim(), this.mode === 'solo', this.shtatatEveryRound,
+      this.auth.getToken());
     this.joined = true;
   }
 

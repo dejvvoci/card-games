@@ -15,6 +15,7 @@ export interface MeldView {
 export interface PeseqindshPlayerView {
   id: string;
   username: string;
+  bot: boolean;
   seatIndex: number;
   hasOpened: boolean;
   totalScore: number;
@@ -33,4 +34,6 @@ export interface PeseqindshStateView {
   openPile: string[];
   melds: MeldView[];
   players: PeseqindshPlayerView[];
+  /** Epoch ms kur vendi bosh mbushet automatikisht me BOT, nëse dhoma ende pret lojtar */
+  lobbyDeadlineEpochMs: number;
 }

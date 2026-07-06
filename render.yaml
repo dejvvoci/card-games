@@ -1,3 +1,8 @@
+databases:
+  # ---- Baza e të dhënave: llogaritë e përdoruesve + historiku i statistikave ----
+  - name: pesekatesh-db
+    plan: free
+
 services:
   # ---- BACKEND: Spring Boot (Docker) ----
   - type: web
@@ -9,3 +14,23 @@ services:
     envVars:
       - key: ALLOWED_ORIGINS
         value: "*"   # rregulloje me URL-në e frontend-it (Netlify) pas deploy të parë
+      - key: DB_HOST
+        fromDatabase:
+          name: pesekatesh-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: pesekatesh-db
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: pesekatesh-db
+          property: database
+      - key: DB_USERNAME
+        fromDatabase:
+          name: pesekatesh-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: pesekatesh-db
+          property: password

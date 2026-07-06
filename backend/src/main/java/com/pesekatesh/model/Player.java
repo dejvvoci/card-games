@@ -12,6 +12,9 @@ public class Player {
     private List<Card> hand = new ArrayList<>();
     private int totalScore = 0;
 
+    /** Lidhja me llogarinë e loguar (nëse ka) — përdoret vetëm për të regjistruar historikun e statistikave */
+    private Long userId;
+
     /** Për Katin e 5-të: pozicioni kur mbaron letrat (1=i pari, 4=i fundit) */
     private int finishPosition = 0;
 
@@ -40,6 +43,8 @@ public class Player {
     public void addScore(int delta) { this.totalScore += delta; }
     public int getFinishPosition() { return finishPosition; }
     public void setFinishPosition(int finishPosition) { this.finishPosition = finishPosition; }
+    public Long getUserId() { return userId; }
+    public void setUserId(Long userId) { this.userId = userId; }
 
     public boolean hasSuit(Suit suit) {
         return hand.stream().anyMatch(c -> c.getSuit() == suit);

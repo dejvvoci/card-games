@@ -6,6 +6,9 @@ public class JoinMessage {
     private boolean soloVsBots; // true = Solo Mode (plotëso me bot menjëherë)
     private boolean shtatatEveryRound = true; // false = Shtatat vetëm si raund vendimtar në fund
 
+    /** Token i llogarisë (opsional) — nëse lojtari është i loguar, lidh Player-in me User-in për historikun e statistikave */
+    private String authToken;
+
     public String getPlayerId() { return playerId; }
     public void setPlayerId(String playerId) { this.playerId = playerId; }
     public String getUsername() { return username; }
@@ -14,4 +17,6 @@ public class JoinMessage {
     public void setSoloVsBots(boolean soloVsBots) { this.soloVsBots = soloVsBots; }
     public boolean isShtatatEveryRound() { return shtatatEveryRound; }
     public void setShtatatEveryRound(boolean shtatatEveryRound) { this.shtatatEveryRound = shtatatEveryRound; }
+    public String getAuthToken() { return authToken; }
+    public void setAuthToken(String authToken) { this.authToken = authToken; }
 }

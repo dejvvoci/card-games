@@ -2,8 +2,8 @@ import { Injectable } from '@angular/core';
 import { Client, IMessage } from '@stomp/stompjs';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { GameStateView } from '../models/game-state.model';
-import { Card } from '../models/card.model';
-import { environment } from '../../environments/environment';
+import { Card } from '../../../models/card.model';
+import { environment } from '../../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class GameWebSocketService {
@@ -25,7 +25,8 @@ export class GameWebSocketService {
   private connectionStatus = new BehaviorSubject<boolean>(false);
   public connectionStatus$ = this.connectionStatus.asObservable();
 
-  connect(roomId: string, playerId: string, username: string, soloVsBots: boolean, shtatatEveryRound: boolean): void {
+  connect(roomId: string, playerId: string, username: string, soloVsBots: boolean, shtatatEveryRound: boolean,
+          authToken: string | null = null): void {
     this.roomId = roomId;
     this.playerId = playerId;
 
@@ -47,10 +48,10 @@ export class GameWebSocketService {
           this.errorSubject.next(msg.body);
         });
 
-        // Hyrje në dhomë
+        // Hyrje në dhomë (authToken lidh Player-in me llogarinë e loguar, për historikun e statistikave)
         this.client.publish({
           destination: `/app/join/${roomId}`,
-          body: JSON.stringify({ playerId, username, soloVsBots, shtatatEveryRound }),
+          body: JSON.stringify({ playerId, username, soloVsBots, shtatatEveryRound, authToken }),
         });
       },
       onStompError: (frame) => {

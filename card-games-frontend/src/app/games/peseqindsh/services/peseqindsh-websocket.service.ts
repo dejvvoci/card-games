@@ -18,7 +18,7 @@ export class PeseqindshWebSocketService {
   private errorSubject = new Subject<string>();
   public errors$: Observable<string> = this.errorSubject.asObservable();
 
-  connect(roomId: string, playerId: string, username: string): void {
+  connect(roomId: string, playerId: string, username: string, authToken: string | null = null): void {
     this.roomId = roomId;
     this.playerId = playerId;
 
@@ -33,9 +33,10 @@ export class PeseqindshWebSocketService {
         this.client.subscribe('/user/queue/peseqindsh-errors', (msg: IMessage) => {
           this.errorSubject.next(msg.body);
         });
+        // authToken lidh Player-in me llogarinë e loguar, për historikun e statistikave
         this.client.publish({
           destination: `/app/peseqindsh/join/${roomId}`,
-          body: JSON.stringify({ playerId, username }),
+          body: JSON.stringify({ playerId, username, authToken }),
         });
       },
     });
