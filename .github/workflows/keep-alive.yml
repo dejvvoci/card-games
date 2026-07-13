@@ -1,0 +1,15 @@
+name: Keep backend alive
+
+# Render free tier fjeh instancën pas ~15 min inaktivitet, dhe kërkesa e parë pas kësaj
+# mund të vonojë 50s+. Ky workflow i bie backend-it çdo 10 min që të mos flejë kurrë.
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping backend health endpoint
+        run: curl -fsS --max-time 60 https://pesekatesh-backend.onrender.com/api/health
