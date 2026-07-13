@@ -18,6 +18,10 @@ export class PeseqindshWebSocketService {
   private errorSubject = new Subject<string>();
   public errors$: Observable<string> = this.errorSubject.asObservable();
 
+  /** true kur lidhja STOMP është aktive */
+  private connectionStatus = new BehaviorSubject<boolean>(false);
+  public connectionStatus$ = this.connectionStatus.asObservable();
+
   connect(roomId: string, playerId: string, username: string, soloVsBots: boolean, authToken: string | null = null): void {
     this.roomId = roomId;
     this.playerId = playerId;
@@ -27,6 +31,7 @@ export class PeseqindshWebSocketService {
       brokerURL: `${environment.wsEndpoint}?playerId=${encodeURIComponent(playerId)}`,
       reconnectDelay: 3000,
       onConnect: () => {
+        this.connectionStatus.next(true);
         this.client.subscribe('/user/queue/peseqindsh-state', (msg: IMessage) => {
           this.stateSubject.next(JSON.parse(msg.body));
         });
@@ -38,6 +43,9 @@ export class PeseqindshWebSocketService {
           destination: `/app/peseqindsh/join/${roomId}`,
           body: JSON.stringify({ playerId, username, soloVsBots, authToken }),
         });
+      },
+      onWebSocketClose: () => {
+        this.connectionStatus.next(false);
       },
     });
     this.client.activate();

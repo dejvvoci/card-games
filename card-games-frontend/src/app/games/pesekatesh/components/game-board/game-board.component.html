@@ -18,8 +18,10 @@
       <div class="room-row">
         <input class="field-input" type="text" [(ngModel)]="roomId" maxlength="10" />
         <button class="regenerate-btn" (click)="roomId = generateRoomCode()">🔄</button>
+        <button class="regenerate-btn" (click)="onShareGame()" title="Ndaj lojën">🔗</button>
       </div>
-      <p class="hint">Ndaje këtë kod me 3 miqtë e tu — të gjithë duhet të fusin të njëjtin kod.</p>
+      <p class="hint" *ngIf="!linkCopied">Ndaje këtë kod me 3 miqtë e tu — të gjithë duhet të fusin të njëjtin kod, ose kliko 🔗 për të ndarë linkun direkt.</p>
+      <p class="hint" *ngIf="linkCopied">✓ Linku u kopjua!</p>
     </ng-container>
 
     <label class="field-label">Shtatat</label>
@@ -37,6 +39,9 @@
 
   <!-- Mesazhi i gabimit -->
   <div class="error-toast" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+  <!-- Lidhja u ndërpre — STOMP-i po riprovon vetë, s'ka nevojë të bësh asgjë -->
+  <div class="reconnect-banner" *ngIf="!wsConnected">🔌 Lidhja u ndërpre — duke u rilidhur...</div>
 
   <!-- Dhoma ende pret lojtarë: vendet bosh mbushen automatikisht me BOT pas numërimit mbrapsht -->
   <div class="lobby-banner" *ngIf="s.phase === 'WAITING_FOR_PLAYERS'">
@@ -161,6 +166,8 @@
         [width]="60"
         [clickable]="true"
         [dimmed]="!isCardPlayable(card) && !mustGiveCardToBlocked"
+        appSwipeUp
+        (appSwipeUp)="onCardClick(card)"
         (cardClick)="onCardClick(card)">
       </app-playing-card>
     </div>

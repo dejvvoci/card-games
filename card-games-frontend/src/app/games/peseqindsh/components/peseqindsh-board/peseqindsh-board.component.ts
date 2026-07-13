@@ -1,7 +1,7 @@
 import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { PeseqindshWebSocketService } from '../../services/peseqindsh-websocket.service';
 import { PeseqindshStateView, MeldView, PeseqindshPlayerView } from '../../models/game-state.model';
@@ -9,11 +9,15 @@ import { Card, SUIT_SYMBOL, SUIT_COLOR, rankLabel, parseCardLabel } from '../../
 import { PlayingCardComponent } from '../../../../shared/playing-card/playing-card.component';
 import { AuthService } from '../../../../auth/auth.service';
 import { VoiceChatService } from '../../../../voice/voice-chat.service';
+import { saveGameSession, loadGameSession, clearGameSession } from '../../../../shared/game-session-store';
+import { SwipeUpDirective } from '../../../../shared/swipe-up.directive';
+
+const SESSION_KEY = 'peseqindsh';
 
 @Component({
   selector: 'app-peseqindsh-board',
   standalone: true,
-  imports: [CommonModule, FormsModule, PlayingCardComponent],
+  imports: [CommonModule, FormsModule, PlayingCardComponent, SwipeUpDirective],
   templateUrl: './peseqindsh-board.component.html',
   styleUrls: ['./peseqindsh-board.component.css'],
 })
@@ -60,8 +64,14 @@ export class PeseqindshBoardComponent implements OnInit, OnDestroy {
   lobbySecondsLeft = 0;
   private lobbyCountdownTimer: ReturnType<typeof setInterval> | null = null;
 
+  /** true kur lidhja STOMP është aktive — përdoret për banerin "duke u rilidhur..." */
+  wsConnected = true;
+
+  /** "Ndaj lojën": kopjimi i linkut u konfirmua vizualisht për pak sekonda */
+  linkCopied = false;
+
   constructor(private ws: PeseqindshWebSocketService, private cdr: ChangeDetectorRef, public auth: AuthService,
-              private router: Router, public voiceChat: VoiceChatService) {}
+              private router: Router, private route: ActivatedRoute, public voiceChat: VoiceChatService) {}
 
   ngOnInit(): void {
     if (this.auth.username()) {
@@ -79,8 +89,37 @@ export class PeseqindshBoardComponent implements OnInit, OnDestroy {
         this.cdr.markForCheck();
       }),
       this.ws.errors$.subscribe((msg) => this.showError(msg)),
+      this.ws.connectionStatus$.subscribe((connected) => {
+        this.wsConnected = connected;
+        this.cdr.markForCheck();
+      }),
     );
-    this.roomId = this.generateRoomCode();
+
+    const roomFromLink = this.route.snapshot.queryParamMap.get('room')?.trim().toUpperCase() || null;
+    const saved = loadGameSession(SESSION_KEY);
+
+    // Rihyrje automatike: nëse faqja u rifreskua ndërkohë që isha në një lojë aktive (ose e rihapa
+    // të njëjtin link ftese), rilidhu në të njëjtën dhomë me të njëjtin playerId — backend-i më njeh,
+    // s'e humb vendin. Nëse linku ftese tregon një dhomë TJETËR, ai ka përparësi ndaj sesionit të vjetër.
+    if (saved && (!roomFromLink || saved.roomId === roomFromLink)) {
+      this.username = saved.username;
+      this.mode = (saved['mode'] as 'solo' | 'multiplayer') ?? 'multiplayer';
+      this.roomId = saved.roomId;
+      this.ws.connect(saved.roomId, saved.playerId, this.username, this.mode === 'solo', this.auth.getToken());
+      this.joined = true;
+      return;
+    }
+
+    // Nëse erdhëm nga një link "Ndaj lojën" (?room=KODI): hyr direkt në dhomë, pa kërkuar rishkrim kodi
+    if (roomFromLink) {
+      this.mode = 'multiplayer';
+      this.roomId = roomFromLink;
+      if (this.canJoin) {
+        this.onJoinSubmit();
+      }
+    } else {
+      this.roomId = this.generateRoomCode();
+    }
   }
 
   ngOnDestroy(): void {
@@ -159,11 +198,31 @@ export class PeseqindshBoardComponent implements OnInit, OnDestroy {
     const playerId = 'p-' + Math.random().toString(36).substring(2, 10);
     // Solo: dhomë private e gjeneruar automatikisht (bot-i plotësohet menjëherë nga backend)
     const roomToJoin = this.mode === 'solo' ? 'solo-' + playerId : this.roomId.trim().toUpperCase();
-    this.ws.connect(roomToJoin, playerId, this.username.trim(), this.mode === 'solo', this.auth.getToken());
+    const username = this.username.trim();
+    saveGameSession(SESSION_KEY, { roomId: roomToJoin, playerId, username, mode: this.mode });
+    this.ws.connect(roomToJoin, playerId, username, this.mode === 'solo', this.auth.getToken());
     this.joined = true;
   }
 
+  /** Gjeneron linkun e dhomës dhe e ndan (Web Share API në mobile, ose kopjim në clipboard) */
+  async onShareGame(): Promise<void> {
+    const link = `${window.location.origin}/peseqindsh?room=${encodeURIComponent(this.roomId.trim().toUpperCase())}`;
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: 'Peseqindsh', text: 'Eja të luajmë Peseqindsh!', url: link });
+        return;
+      } catch {
+        // përdoruesi anuloi ose dështoi share-i -> bie mbrapa te kopjimi
+      }
+    }
+    await navigator.clipboard.writeText(link);
+    this.linkCopied = true;
+    this.cdr.markForCheck();
+    setTimeout(() => { this.linkCopied = false; this.cdr.markForCheck(); }, 2500);
+  }
+
   backToSelector(): void {
+    clearGameSession(SESSION_KEY);
     if (this.joined) this.ws.disconnect();
     this.router.navigateByUrl('/');
   }
@@ -319,6 +378,13 @@ export class PeseqindshBoardComponent implements OnInit, OnDestroy {
     if (!this.canDiscard) return;
     this.ws.discard(this.selectedCards[0]);
     this.selectedCards = [];
+  }
+
+  /** Gjest touch: fshirja lart mbi një letër e hedh direkt në tokë, pa nevojën e zgjedhjes+butonit */
+  onSwipeDiscard(card: Card): void {
+    if (!this.isMyTurn || this.state?.discardedThisTurn) return;
+    this.ws.discard(card);
+    this.selectedCards = this.selectedCards.filter((c) => !(c.suit === card.suit && c.rank === card.rank));
   }
 
   onDrawClosed(): void {

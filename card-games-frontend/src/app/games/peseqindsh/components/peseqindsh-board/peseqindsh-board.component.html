@@ -18,8 +18,10 @@
       <div class="room-row">
         <input class="field-input" type="text" [(ngModel)]="roomId" maxlength="10" />
         <button class="regenerate-btn" (click)="roomId = generateRoomCode()">🔄</button>
+        <button class="regenerate-btn" (click)="onShareGame()" title="Ndaj lojën">🔗</button>
       </div>
-      <p class="hint">Ndaje këtë kod me shokun tënd — të dy duhet të fusin të njëjtin kod.</p>
+      <p class="hint" *ngIf="!linkCopied">Ndaje këtë kod me shokun tënd — të dy duhet të fusin të njëjtin kod, ose kliko 🔗 për të ndarë linkun direkt.</p>
+      <p class="hint" *ngIf="linkCopied">✓ Linku u kopjua!</p>
     </ng-container>
 
     <button class="join-btn" [disabled]="!canJoin" (click)="onJoinSubmit()">Hyr në tavolinë →</button>
@@ -29,6 +31,9 @@
 <div class="board" *ngIf="joined && state as s">
 
   <div class="error-toast" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+  <!-- Lidhja u ndërpre — STOMP-i po riprovon vetë, s'ka nevojë të bësh asgjë -->
+  <div class="reconnect-banner" *ngIf="!wsConnected">🔌 Lidhja u ndërpre — duke u rilidhur...</div>
 
   <!-- Dhoma ende pret lojtarë: vendi bosh mbushet automatikisht me BOT pas numërimit mbrapsht -->
   <div class="lobby-banner" *ngIf="s.phase === 'WAITING_FOR_PLAYERS'">
@@ -124,6 +129,8 @@
       [class.dragging]="i === dragFromIndex"
       [class.drag-over]="i === dragOverIndex && i !== dragFromIndex"
       draggable="true"
+      appSwipeUp
+      (appSwipeUp)="onSwipeDiscard(card)"
       (cardClick)="toggleSelect(card)"
       (dragstart)="onHandDragStart(i, $event)"
       (dragover)="onHandDragOver(i, $event)"
