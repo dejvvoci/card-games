@@ -1,0 +1,57 @@
+<!-- I palogur: faqe krejtësisht e izoluar, vetëm hyrje/regjistrim — asnjë lojë s'shfaqet -->
+<div class="lobby auth-gate" *ngIf="!auth.username()">
+  <p class="eyebrow">Trashëgimi shqiptare, e rimenduar</p>
+  <h1>Hyr për të luajtur</h1>
+  <p class="subtitle">Krijo llogari ose hyr për të parë lojërat dhe historikun tënd.</p>
+  <app-auth-widget></app-auth-widget>
+</div>
+
+<!-- I loguar: shiriti i llogarisë + skedat Lojërat/Statistikat -->
+<div class="lobby" *ngIf="auth.username()">
+  <div class="account-bar">
+    <span class="account-name">👤 {{ auth.username() }}</span>
+    <button class="logout-btn" (click)="auth.logout()">Dil</button>
+  </div>
+
+  <div class="tab-switcher">
+    <button [class.active]="activeTab==='games'" (click)="activeTab='games'">Lojërat</button>
+    <button [class.active]="activeTab==='stats'" (click)="activeTab='stats'">Statistikat</button>
+  </div>
+
+  <ng-container *ngIf="activeTab==='games'">
+    <p class="eyebrow">Trashëgimi shqiptare, e rimenduar</p>
+    <h1>Zgjidh letrën tënde</h1>
+    <p class="subtitle">Çdo lojë është një tavolinë e vetën — kliko kartën për të hyrë.</p>
+
+    <div class="card-spread">
+      <div
+        class="game-card"
+        [class.accent-primary]="g.accent==='primary'"
+        [class.accent-accent]="g.accent==='accent'"
+        [style.transform]="'rotate(' + g.tilt + 'deg)'"
+        *ngFor="let g of games"
+        (click)="play(g)">
+
+        <div class="corner corner-top">
+          <span class="corner-label">{{ g.cornerLabel }}</span>
+          <span class="corner-icon">{{ g.centerIcon }}</span>
+        </div>
+
+        <div class="card-center">
+          <span class="center-icon">{{ g.centerIcon }}</span>
+          <h2>{{ g.name }}</h2>
+          <p>{{ g.description }}</p>
+        </div>
+
+        <div class="corner corner-bottom">
+          <span class="corner-label">{{ g.cornerLabel }}</span>
+          <span class="corner-icon">{{ g.centerIcon }}</span>
+        </div>
+
+        <button class="cta-btn" type="button">Luaj tani →</button>
+      </div>
+    </div>
+  </ng-container>
+
+  <app-stats-page *ngIf="activeTab==='stats'"></app-stats-page>
+</div>
