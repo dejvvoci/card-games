@@ -12,4 +12,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Ping backend health endpoint
-        run: curl -fsS --max-time 120 https://pesekatesh-backend.onrender.com/api/health
+        run: |
+          curl -fsS --max-time 30 --retry 6 --retry-delay 20 --retry-all-errors \
+            https://pesekatesh-backend.onrender.com/api/health
