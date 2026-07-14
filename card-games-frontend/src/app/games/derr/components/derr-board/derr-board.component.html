@@ -1,0 +1,157 @@
+<div class="join-screen" *ngIf="!joined">
+  <div class="join-card">
+    <button class="back-btn" (click)="backToSelector()">← Kthehu te lojërat</button>
+    <p class="eyebrow">Derri në Dorë</p>
+    <h2>Përgatit tavolinën</h2>
+
+    <label class="field-label">Emri yt</label>
+    <input class="field-input" type="text" [(ngModel)]="username" maxlength="20" />
+
+    <label class="field-label">Mënyra e lojës</label>
+    <div class="mode-toggle">
+      <button [class.active]="mode==='solo'" (click)="mode='solo'">Solo (kundër 3 Bot)</button>
+      <button [class.active]="mode==='multiplayer'" (click)="mode='multiplayer'">Multiplayer (4 real)</button>
+    </div>
+
+    <ng-container *ngIf="mode==='multiplayer'">
+      <label class="field-label">Kodi i dhomës</label>
+      <div class="room-row">
+        <input class="field-input" type="text" [(ngModel)]="roomId" maxlength="10" />
+        <button class="regenerate-btn" (click)="roomId = generateRoomCode()">🔄</button>
+        <button class="regenerate-btn" (click)="onShareGame()" title="Ndaj lojën">🔗</button>
+      </div>
+      <p class="hint" *ngIf="!linkCopied">Ndaje këtë kod me 3 miqtë e tu, ose kliko 🔗 për të ndarë linkun direkt.</p>
+      <p class="hint" *ngIf="linkCopied">✓ Linku u kopjua!</p>
+    </ng-container>
+
+    <p class="hint rules-hint">
+      Loja hiqet 3 nga 4 Mbretërit — mbetet vetëm Mbreti Maç (K♠) si "Derri". Tërhiqni letra të verbëra
+      nga lojtari para jush; kush mbetet i fundit me letrën e pambetur pa çift, humbet.
+    </p>
+
+    <button class="join-btn" [disabled]="!canJoin" (click)="onJoinSubmit()">Hyr në tavolinë →</button>
+  </div>
+</div>
+
+<div class="table-container" *ngIf="joined && state as s">
+
+  <!-- Mesazhi i gabimit -->
+  <div class="error-toast" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+  <!-- Lidhja u ndërpre — STOMP-i po riprovon vetë, s'ka nevojë të bësh asgjë -->
+  <div class="reconnect-banner" *ngIf="!wsConnected">🔌 Lidhja u ndërpre — duke u rilidhur...</div>
+
+  <!-- Njoftimi "X shpëtoi!" -->
+  <div class="escape-toast" *ngIf="escapeMessage">{{ escapeMessage }}</div>
+
+  <!-- Dhoma ende pret lojtarë: vendet bosh mbushen automatikisht me BOT pas numërimit mbrapsht -->
+  <div class="lobby-banner" *ngIf="s.phase === 'WAITING_FOR_PLAYERS'">
+    Duke pritur lojtarë... {{ s.players.length }}/4
+    <ng-container *ngIf="s.players.length < 4">
+      — vendet bosh plotësohen me BOT për {{ lobbySecondsLeft }}s
+    </ng-container>
+  </div>
+
+  <!-- Kundërshtari PËRBALLË (lart) -->
+  <div class="seat seat-top" *ngIf="opponents[1] as opp">
+    <div class="player-tag" [class.active-turn]="s.drawerSeat === opp.seatIndex" [class.escaped]="!opp.active">
+      {{ opp.username }}
+      <span *ngIf="opp.bot" class="bot-badge">BOT</span>
+      <span *ngIf="!opp.bot && voiceChat.getPeerState(opp.id) as vs" class="voice-badge" [class.voice-connected]="vs === 'connected'">{{ vs === 'connected' ? '🎙️' : '⏳' }}</span>
+      <span *ngIf="!opp.active" class="safe-badge">✓ Shpëtoi</span>
+    </div>
+    <div class="hand-back" *ngIf="opp.active">
+      <ng-container *ngIf="isDrawableHolderSeat(opp.seatIndex); else plainBackTop">
+        <app-playing-card *ngFor="let i of range(opp.cardsInHand)" [faceDown]="true" [width]="36" [clickable]="true" (cardClick)="onDrawCard(i)"></app-playing-card>
+      </ng-container>
+      <ng-template #plainBackTop>
+        <app-playing-card *ngFor="let c of range(opp.cardsInHand)" [faceDown]="true" [width]="34"></app-playing-card>
+      </ng-template>
+    </div>
+  </div>
+
+  <div class="middle-row">
+    <!-- Kundërshtari MAJTAS -->
+    <div class="seat seat-left" *ngIf="opponents[0] as opp">
+      <div class="player-tag" [class.active-turn]="s.drawerSeat === opp.seatIndex" [class.escaped]="!opp.active">
+        {{ opp.username }}
+        <span *ngIf="opp.bot" class="bot-badge">BOT</span>
+        <span *ngIf="!opp.active" class="safe-badge">✓ Shpëtoi</span>
+      </div>
+      <div class="hand-back vertical" *ngIf="opp.active">
+        <ng-container *ngIf="isDrawableHolderSeat(opp.seatIndex); else plainBackLeft">
+          <app-playing-card *ngFor="let i of range(opp.cardsInHand)" [faceDown]="true" [width]="30" [clickable]="true" (cardClick)="onDrawCard(i)"></app-playing-card>
+        </ng-container>
+        <ng-template #plainBackLeft>
+          <app-playing-card *ngFor="let c of range(opp.cardsInHand)" [faceDown]="true" [width]="30"></app-playing-card>
+        </ng-template>
+      </div>
+    </div>
+
+    <!-- QENDRA -->
+    <div class="center-felt">
+      <div class="draw-instruction" *ngIf="s.phase==='PLAYING' && isMyTurn">
+        👉 Tërhiq një letër (e verbër) nga {{ holderPlayer?.username }}
+      </div>
+      <div class="draw-instruction waiting" *ngIf="s.phase==='PLAYING' && isMyHolding">
+        🤲 {{ drawerPlayer?.username }} po tërheq një letër nga dora jote...
+      </div>
+      <div class="draw-instruction waiting" *ngIf="s.phase==='PLAYING' && !isMyTurn && !isMyHolding">
+        ⏳ {{ drawerPlayer?.username }} po tërheq nga {{ holderPlayer?.username }}...
+      </div>
+
+      <div class="burned-count" *ngIf="s.burnedPairs.length">
+        🔥 Çifte të djegura: {{ s.burnedPairs.length / 2 }}
+      </div>
+    </div>
+
+    <!-- Kundërshtari DJATHTAS -->
+    <div class="seat seat-right" *ngIf="opponents[2] as opp">
+      <div class="player-tag" [class.active-turn]="s.drawerSeat === opp.seatIndex" [class.escaped]="!opp.active">
+        {{ opp.username }}
+        <span *ngIf="opp.bot" class="bot-badge">BOT</span>
+        <span *ngIf="!opp.active" class="safe-badge">✓ Shpëtoi</span>
+      </div>
+      <div class="hand-back vertical" *ngIf="opp.active">
+        <ng-container *ngIf="isDrawableHolderSeat(opp.seatIndex); else plainBackRight">
+          <app-playing-card *ngFor="let i of range(opp.cardsInHand)" [faceDown]="true" [width]="30" [clickable]="true" (cardClick)="onDrawCard(i)"></app-playing-card>
+        </ng-container>
+        <ng-template #plainBackRight>
+          <app-playing-card *ngFor="let c of range(opp.cardsInHand)" [faceDown]="true" [width]="30"></app-playing-card>
+        </ng-template>
+      </div>
+    </div>
+  </div>
+
+  <!-- DORA IME (gjithmonë e dukshme për mua, s'luhet direkt — thjesht mban letrat pa çift) -->
+  <div class="my-seat">
+    <div class="player-tag" [class.active-turn]="isMyTurn" [class.escaped]="me && !me.active">
+      Ti
+      <span *ngIf="me && !me.active" class="safe-badge">✓ Shpëtoi</span>
+    </div>
+    <div class="my-hand" *ngIf="me?.active">
+      <app-playing-card *ngFor="let card of myHandCards" [suit]="card.suit" [rank]="card.rank" [width]="54"></app-playing-card>
+    </div>
+  </div>
+
+  <!-- Zë (audio) mes lojtarëve realë -->
+  <div class="voice-chat-panel">
+    <button *ngIf="!voiceChat.active()" (click)="onJoinVoiceChat()">🎙️ Bashkohu me zë</button>
+    <ng-container *ngIf="voiceChat.active()">
+      <button (click)="voiceChat.toggleMute()">{{ voiceChat.muted() ? '🔇 I heshtur' : '🎙️ Aktiv' }}</button>
+      <button (click)="voiceChat.leave()">Dil nga zëri</button>
+    </ng-container>
+  </div>
+
+  <!-- FUNDI I LOJËS -->
+  <div class="game-over-banner" *ngIf="s.phase === 'GAME_OVER'">
+    <div class="derr-reveal">🐷</div>
+    <p><strong>{{ matchLoserPlayer?.username }}</strong> mbeti me Derrin (K♠) — ai është zyrtarisht "DERRI"!</p>
+    <button (click)="backToSelector()">Kthehu te lojërat</button>
+  </div>
+
+</div>
+
+<div class="waiting-screen" *ngIf="joined && !state">
+  <p>Duke u lidhur me lojën...</p>
+</div>

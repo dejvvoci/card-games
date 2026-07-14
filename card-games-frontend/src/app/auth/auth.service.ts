@@ -67,7 +67,7 @@ export class AuthService {
     return this.token !== null;
   }
 
-  async getStats(gameType: 'PESEKATESH' | 'PESEQINDSH'): Promise<GameStats> {
+  async getStats(gameType: 'PESEKATESH' | 'PESEQINDSH' | 'DERR'): Promise<GameStats> {
     return firstValueFrom(
       this.http.get<GameStats>(`${environment.apiBaseUrl}/stats/${gameType}`, {
         headers: { Authorization: `Bearer ${this.token}` },

@@ -18,4 +18,10 @@ export const routes: Routes = [
       .then((m) => m.PeseqindshBoardComponent),
     canActivate: [authGuard],
   },
+  {
+    path: 'derr',
+    loadComponent: () => import('./games/derr/components/derr-board/derr-board.component')
+      .then((m) => m.DerrBoardComponent),
+    canActivate: [authGuard],
+  },
 ];

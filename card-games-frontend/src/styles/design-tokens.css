@@ -31,10 +31,15 @@
   --color-accent-soft: #EFDACD;    /* terracotta e zbutur për sfonde badge/etiketa */
   --color-accent-deep: #8A4A34;    /* terracotta e errët, për tekst mbi accent-soft */
 
+  --color-tertiary: #A6791E;       /* Antique Gold - identiteti i "Derri në Dorë" */
+  --color-tertiary-soft: #F0E2BE;  /* ar i zbutur për sfonde badge/etiketa */
+  --color-tertiary-deep: #6E4F0F;  /* ar i errët, për tekst mbi tertiary-soft */
+
   --color-text: #211F1A;            /* "e zezë" e ngrohtë, pak më e thellë për lexueshmëri */
   --color-text-muted: #55503F;      /* muted i ngrohtë, por me kontrast të mjaftueshëm (jo më i zbehtë) */
   --color-text-on-primary: #F8F4EC;
   --color-text-on-accent: #FDF6F1;
+  --color-text-on-tertiary: #FBF6E9;
 
   --color-border: rgba(33, 31, 26, 0.14);          /* pak më e dukshme se më parë */
   --color-border-strong: rgba(33, 31, 26, 0.30);   /* dukshëm më e fortë - kufijtë e butonave/fushave */
@@ -48,5 +53,6 @@
   /* ===== HIJE TË BUTA (të tonuara me primary, jo të zeza) ===== */
   --shadow-soft: 0 10px 30px -8px rgba(15, 81, 50, 0.16);
   --shadow-soft-accent: 0 10px 30px -8px rgba(193, 110, 81, 0.20);
+  --shadow-soft-tertiary: 0 10px 30px -8px rgba(166, 121, 30, 0.20);
   --shadow-inset-glass: inset 0 1px 0 rgba(255,255,255,0.4);
 }

@@ -1,5 +1,7 @@
 package com.pesekatesh.stats;
 
+import com.pesekatesh.derr.DerrPlayer;
+import com.pesekatesh.derr.DerrState;
 import com.pesekatesh.model.GameState;
 import com.pesekatesh.model.Player;
 import com.pesekatesh.peseqindsh.model.PeseqindshPlayer;
@@ -45,6 +47,20 @@ public class GameResultService {
             PeseqindshPlayer p = ranked.get(i);
             if (p.isBot() || p.getUserId() == null) continue;
             recordIfUserExists(p.getUserId(), GameType.PESEQINDSH, state.getRoomId(), i + 1, totalPlayers);
+        }
+    }
+
+    /**
+     * Thirret kur një ndeshje "Derri në Dorë" mbaron (GAME_OVER) — regjistron vendin e secilit lojtar
+     * human i loguar, sipas rendit të shpëtimit (1 = i pari që shpëtoi, N = "Derri" i fundit).
+     */
+    public void recordDerrResult(DerrState state) {
+        List<Integer> order = state.getFinishOrder();
+        int totalPlayers = state.getPlayers().size();
+        for (int i = 0; i < order.size(); i++) {
+            DerrPlayer p = state.getPlayerBySeat(order.get(i));
+            if (p == null || p.isBot() || p.getUserId() == null) continue;
+            recordIfUserExists(p.getUserId(), GameType.DERR, state.getRoomId(), i + 1, totalPlayers);
         }
     }
 

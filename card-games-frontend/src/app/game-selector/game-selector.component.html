@@ -28,6 +28,7 @@
         class="game-card"
         [class.accent-primary]="g.accent==='primary'"
         [class.accent-accent]="g.accent==='accent'"
+        [class.accent-tertiary]="g.accent==='tertiary'"
         [style.transform]="'rotate(' + g.tilt + 'deg)'"
         *ngFor="let g of games"
         (click)="play(g)">

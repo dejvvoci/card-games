@@ -2,7 +2,7 @@ import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AuthService, GameStats } from '../auth/auth.service';
 
-type GameTypeKey = 'PESEKATESH' | 'PESEQINDSH';
+type GameTypeKey = 'PESEKATESH' | 'PESEQINDSH' | 'DERR';
 
 interface GameFilterOption {
   key: GameTypeKey;
@@ -37,11 +37,11 @@ interface GameFilterOption {
           <span class="stat-value">{{ s.second }}</span>
           <span class="stat-label">Vend i 2-të</span>
         </div>
-        <div class="stat-card" *ngIf="selectedGame==='PESEKATESH'">
+        <div class="stat-card" *ngIf="selectedGame==='PESEKATESH' || selectedGame==='DERR'">
           <span class="stat-value">{{ s.third }}</span>
           <span class="stat-label">Vend i 3-të</span>
         </div>
-        <div class="stat-card" *ngIf="selectedGame==='PESEKATESH'">
+        <div class="stat-card" *ngIf="selectedGame==='PESEKATESH' || selectedGame==='DERR'">
           <span class="stat-value">{{ s.fourth }}</span>
           <span class="stat-label">Vend i 4-t</span>
         </div>
@@ -130,6 +130,7 @@ export class StatsPageComponent implements OnInit {
   games: GameFilterOption[] = [
     { key: 'PESEKATESH', label: 'Pesëkatësh' },
     { key: 'PESEQINDSH', label: 'Peseqindsh' },
+    { key: 'DERR', label: 'Derri në Dorë' },
   ];
 
   selectedGame: GameTypeKey = 'PESEKATESH';

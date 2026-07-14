@@ -12,7 +12,7 @@ interface GameOption {
   route: string;
   cornerLabel: string;   // p.sh. "4P" (si vlerë e një letre, por për numrin e lojtarëve)
   centerIcon: string;    // simboli i madh qendror i "letrës"
-  accent: 'primary' | 'accent';
+  accent: 'primary' | 'accent' | 'tertiary';
   tilt: number;          // rrotullim i lehtë si letra e shpërndara në tavolinë
 }
 
@@ -50,6 +50,16 @@ export class GameSelectorComponent {
       centerIcon: '♦',
       accent: 'accent',
       tilt: 4,
+    },
+    {
+      id: 'derr',
+      name: 'Derri në Dorë',
+      description: 'Tërhiq letra të verbëra nga fqinji — kush mbetet i fundit, humbet.',
+      route: '/derr',
+      cornerLabel: '4P',
+      centerIcon: '♣',
+      accent: 'tertiary',
+      tilt: -2,
     },
   ];
 

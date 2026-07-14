@@ -109,6 +109,7 @@ h1 {
 }
 .accent-primary:hover { border-color: var(--color-primary); box-shadow: 0 18px 40px -10px rgba(15, 81, 50, 0.32); }
 .accent-accent:hover { border-color: var(--color-accent); box-shadow: 0 18px 40px -10px rgba(193, 110, 81, 0.36); }
+.accent-tertiary:hover { border-color: var(--color-tertiary); box-shadow: 0 18px 40px -10px rgba(166, 121, 30, 0.36); }
 
 .corner {
   display: flex;
@@ -126,6 +127,7 @@ h1 {
 .corner-icon { font-size: 14px; margin-top: 3px; }
 .accent-primary .corner-label, .accent-primary .corner-icon { color: var(--color-primary-deep); }
 .accent-accent .corner-label, .accent-accent .corner-icon { color: var(--color-accent-deep); }
+.accent-tertiary .corner-label, .accent-tertiary .corner-icon { color: var(--color-tertiary-deep); }
 
 .card-center {
   display: flex;
@@ -141,6 +143,7 @@ h1 {
 }
 .accent-primary .center-icon { color: var(--color-primary); }
 .accent-accent .center-icon { color: var(--color-accent); }
+.accent-tertiary .center-icon { color: var(--color-tertiary); }
 
 h2 {
   font-family: var(--font-display);
@@ -150,6 +153,7 @@ h2 {
 }
 .accent-primary h2 { color: var(--color-primary-deep); }
 .accent-accent h2 { color: var(--color-accent-deep); }
+.accent-tertiary h2 { color: var(--color-tertiary-deep); }
 
 .game-card p {
   font-weight: var(--weight-regular);
@@ -173,3 +177,4 @@ h2 {
 .cta-btn:hover { filter: brightness(1.08); }
 .accent-primary .cta-btn { background: var(--color-primary); color: var(--color-text-on-primary); }
 .accent-accent .cta-btn { background: var(--color-accent); color: var(--color-text-on-accent); }
+.accent-tertiary .cta-btn { background: var(--color-tertiary); color: var(--color-text-on-tertiary); }
