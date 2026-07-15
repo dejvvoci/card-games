@@ -58,6 +58,8 @@
     </div>
   </div>
 
+  <div class="felt-surface">
+
   <!-- DORA E KUNDËRSHTARIT (kthyer) -->
   <div class="opponent-hand">
     <app-playing-card *ngFor="let c of [].constructor(opponent?.cardsInHand ?? 0)" [faceDown]="true" [width]="30" backFill="#8a2222"></app-playing-card>
@@ -103,6 +105,8 @@
       <app-playing-card *ngFor="let c of m.cards" [suit]="parseLabel(c).suit" [rank]="parseLabel(c).rank" [width]="38"></app-playing-card>
     </div>
   </div>
+
+  </div><!-- /.felt-surface -->
 
   <!-- ZONA E "HAPJES" (staging area para 25 pikëve) -->
   <div class="staging-area" *ngIf="!me?.hasOpened && stagedGroups.length">

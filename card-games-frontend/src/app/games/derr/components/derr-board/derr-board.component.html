@@ -52,39 +52,34 @@
     </ng-container>
   </div>
 
+  <div class="felt-surface">
+
   <!-- Kundërshtari PËRBALLË (lart) -->
-  <div class="seat seat-top" *ngIf="opponents[1] as opp">
+  <div class="seat seat-top" *ngIf="opponents[1] as opp" [class.drawable-highlight]="isDrawableHolderSeat(opp.seatIndex)">
+    <div class="seat-cushion"></div>
     <div class="player-tag" [class.active-turn]="s.drawerSeat === opp.seatIndex" [class.escaped]="!opp.active">
       {{ opp.username }}
       <span *ngIf="opp.bot" class="bot-badge">BOT</span>
       <span *ngIf="!opp.bot && voiceChat.getPeerState(opp.id) as vs" class="voice-badge" [class.voice-connected]="vs === 'connected'">{{ vs === 'connected' ? '🎙️' : '⏳' }}</span>
       <span *ngIf="!opp.active" class="safe-badge">✓ Shpëtoi</span>
     </div>
-    <div class="hand-back" *ngIf="opp.active">
-      <ng-container *ngIf="isDrawableHolderSeat(opp.seatIndex); else plainBackTop">
-        <app-playing-card *ngFor="let i of range(opp.cardsInHand)" [faceDown]="true" [width]="36" [clickable]="true" (cardClick)="onDrawCard(i)"></app-playing-card>
-      </ng-container>
-      <ng-template #plainBackTop>
-        <app-playing-card *ngFor="let c of range(opp.cardsInHand)" [faceDown]="true" [width]="34"></app-playing-card>
-      </ng-template>
+    <div class="hand-back" [class.deal-in]="justDealt" *ngIf="opp.active">
+      <app-playing-card *ngFor="let c of range(opp.cardsInHand); let i = index" [style.--card-i]="i" [faceDown]="true" [width]="34"></app-playing-card>
     </div>
   </div>
 
   <div class="middle-row">
     <!-- Kundërshtari MAJTAS -->
-    <div class="seat seat-left" *ngIf="opponents[0] as opp">
+    <div class="seat seat-left" *ngIf="opponents[0] as opp" [class.drawable-highlight]="isDrawableHolderSeat(opp.seatIndex)">
+      <div class="seat-cushion"></div>
       <div class="player-tag" [class.active-turn]="s.drawerSeat === opp.seatIndex" [class.escaped]="!opp.active">
         {{ opp.username }}
         <span *ngIf="opp.bot" class="bot-badge">BOT</span>
+        <span *ngIf="!opp.bot && voiceChat.getPeerState(opp.id) as vs" class="voice-badge" [class.voice-connected]="vs === 'connected'">{{ vs === 'connected' ? '🎙️' : '⏳' }}</span>
         <span *ngIf="!opp.active" class="safe-badge">✓ Shpëtoi</span>
       </div>
-      <div class="hand-back vertical" *ngIf="opp.active">
-        <ng-container *ngIf="isDrawableHolderSeat(opp.seatIndex); else plainBackLeft">
-          <app-playing-card *ngFor="let i of range(opp.cardsInHand)" [faceDown]="true" [width]="30" [clickable]="true" (cardClick)="onDrawCard(i)"></app-playing-card>
-        </ng-container>
-        <ng-template #plainBackLeft>
-          <app-playing-card *ngFor="let c of range(opp.cardsInHand)" [faceDown]="true" [width]="30"></app-playing-card>
-        </ng-template>
+      <div class="hand-back vertical" [class.deal-in]="justDealt" *ngIf="opp.active">
+        <app-playing-card *ngFor="let c of range(opp.cardsInHand); let i = index" [style.--card-i]="i" [faceDown]="true" [width]="30"></app-playing-card>
       </div>
     </div>
 
@@ -100,37 +95,59 @@
         ⏳ {{ drawerPlayer?.username }} po tërheq nga {{ holderPlayer?.username }}...
       </div>
 
-      <div class="burned-count" *ngIf="s.burnedPairs.length">
+      <div class="burned-count" [class.flash]="justDealt" *ngIf="s.burnedPairs.length">
         🔥 Çifte të djegura: {{ s.burnedPairs.length / 2 }}
       </div>
     </div>
 
     <!-- Kundërshtari DJATHTAS -->
-    <div class="seat seat-right" *ngIf="opponents[2] as opp">
+    <div class="seat seat-right" *ngIf="opponents[2] as opp" [class.drawable-highlight]="isDrawableHolderSeat(opp.seatIndex)">
+      <div class="seat-cushion"></div>
       <div class="player-tag" [class.active-turn]="s.drawerSeat === opp.seatIndex" [class.escaped]="!opp.active">
         {{ opp.username }}
         <span *ngIf="opp.bot" class="bot-badge">BOT</span>
+        <span *ngIf="!opp.bot && voiceChat.getPeerState(opp.id) as vs" class="voice-badge" [class.voice-connected]="vs === 'connected'">{{ vs === 'connected' ? '🎙️' : '⏳' }}</span>
         <span *ngIf="!opp.active" class="safe-badge">✓ Shpëtoi</span>
       </div>
-      <div class="hand-back vertical" *ngIf="opp.active">
-        <ng-container *ngIf="isDrawableHolderSeat(opp.seatIndex); else plainBackRight">
-          <app-playing-card *ngFor="let i of range(opp.cardsInHand)" [faceDown]="true" [width]="30" [clickable]="true" (cardClick)="onDrawCard(i)"></app-playing-card>
-        </ng-container>
-        <ng-template #plainBackRight>
-          <app-playing-card *ngFor="let c of range(opp.cardsInHand)" [faceDown]="true" [width]="30"></app-playing-card>
-        </ng-template>
+      <div class="hand-back vertical" [class.deal-in]="justDealt" *ngIf="opp.active">
+        <app-playing-card *ngFor="let c of range(opp.cardsInHand); let i = index" [style.--card-i]="i" [faceDown]="true" [width]="30"></app-playing-card>
       </div>
     </div>
   </div>
 
   <!-- DORA IME (gjithmonë e dukshme për mua, s'luhet direkt — thjesht mban letrat pa çift) -->
   <div class="my-seat">
+    <div class="seat-cushion"></div>
     <div class="player-tag" [class.active-turn]="isMyTurn" [class.escaped]="me && !me.active">
       Ti
       <span *ngIf="me && !me.active" class="safe-badge">✓ Shpëtoi</span>
     </div>
-    <div class="my-hand" *ngIf="me?.active">
-      <app-playing-card *ngFor="let card of myHandCards" [suit]="card.suit" [rank]="card.rank" [width]="54"></app-playing-card>
+    <div class="my-hand" [class.deal-in]="justDealt" *ngIf="me?.active">
+      <app-playing-card *ngFor="let card of myHandCards; let i = index" [style.--card-i]="i" [suit]="card.suit" [rank]="card.rank" [width]="54"></app-playing-card>
+    </div>
+  </div>
+
+  <!-- Letra "fluturuese" — animacioni i tërheqjes nga dora e kundërshtarit te dora ime -->
+  <div class="flying-draw-card"
+       *ngIf="flyingDraw as fd"
+       [class.from-top]="fd.direction === 'top'"
+       [class.from-left]="fd.direction === 'left'"
+       [class.from-right]="fd.direction === 'right'"
+       [class.arrived]="fd.arrived"
+       [class.burn]="fd.burn"
+       [class.fade-out]="fd.fadeOut">
+    <app-playing-card [suit]="fd.card?.suit ?? null" [rank]="fd.card?.rank ?? null" [faceDown]="!fd.arrived" [width]="60"></app-playing-card>
+  </div>
+
+  </div><!-- /.felt-surface -->
+
+  <!-- Overlay i tërheqjes: kur është radha ime, letrat e kundërshtarit zmadhohen dhe qendrohen -->
+  <div class="draw-overlay" *ngIf="isMyTurn && holderPlayer as h">
+    <div class="draw-overlay-content">
+      <p class="draw-overlay-title">👉 Tërhiq një letër nga {{ h.username }}</p>
+      <div class="draw-overlay-cards">
+        <app-playing-card *ngFor="let i of range(h.cardsInHand)" [faceDown]="true" [width]="86" [clickable]="true" (cardClick)="onDrawCard(i)"></app-playing-card>
+      </div>
     </div>
   </div>
 

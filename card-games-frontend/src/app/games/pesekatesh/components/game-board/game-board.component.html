@@ -57,8 +57,11 @@
     <ng-container *ngIf="s.tiebreakRound">Raundi vendimtar — Shtatat 🔑</ng-container>
   </div>
 
+  <div class="felt-surface">
+
   <!-- Kundërshtari PËRBALLË (lart) -->
   <div class="seat seat-top" *ngIf="opponents[1] as opp">
+    <div class="seat-cushion"></div>
     <div class="player-tag" [class.active-turn]="s.currentPlayerSeat === opp.seatIndex">
       {{ opp.username }} ({{ opp.totalScore }}p) — {{ opp.cardsInHand }} letra
       <span *ngIf="opp.bot" class="bot-badge">BOT</span>
@@ -72,6 +75,7 @@
   <div class="middle-row">
     <!-- Kundërshtari MAJTAS -->
     <div class="seat seat-left" *ngIf="opponents[0] as opp">
+      <div class="seat-cushion"></div>
       <div class="player-tag" [class.active-turn]="s.currentPlayerSeat === opp.seatIndex">
         {{ opp.username }} ({{ opp.totalScore }}p)
         <span *ngIf="opp.bot" class="bot-badge">BOT</span>
@@ -141,6 +145,7 @@
 
     <!-- Kundërshtari DJATHTAS -->
     <div class="seat seat-right" *ngIf="opponents[2] as opp">
+      <div class="seat-cushion"></div>
       <div class="player-tag" [class.active-turn]="s.currentPlayerSeat === opp.seatIndex">
         {{ opp.username }} ({{ opp.totalScore }}p)
         <span *ngIf="opp.bot" class="bot-badge">BOT</span>
@@ -154,6 +159,7 @@
 
   <!-- UNË (poshtë) -->
   <div class="seat seat-bottom" *ngIf="me as myself">
+    <div class="seat-cushion"></div>
     <div class="player-tag" [class.active-turn]="isMyTurn">
       {{ myself.username }} ({{ myself.totalScore }}p)
     </div>
@@ -180,6 +186,8 @@
     <div class="blocked-msg" *ngIf="amIBlocked">Je i bllokuar — pret letër nga lojtari para teje...</div>
     <div class="trade-msg" *ngIf="mustGiveCardToBlocked">👉 Zgjidh një letër për t'ia dhënë lojtarit të bllokuar</div>
   </div>
+
+  </div><!-- /.felt-surface -->
 
   <!-- Zë (audio) mes lojtarëve realë -->
   <div class="voice-chat-panel">

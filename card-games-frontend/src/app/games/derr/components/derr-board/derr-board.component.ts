@@ -44,6 +44,12 @@ export class DerrBoardComponent implements OnInit, OnDestroy {
   private lastSeenEscapeSeq = -1;
   private escapeMessageTimer: ReturnType<typeof setTimeout> | null = null;
 
+  /** Letra "fluturuese": animacioni nga dora e kundërshtarit te dora ime, kur unë jam duke tërhequr */
+  flyingDraw: { direction: 'top' | 'left' | 'right'; card: Card | null; arrived: boolean; burn: boolean; fadeOut: boolean } | null = null;
+
+  /** true për një çast të shkurtër pas shpërndarjes fillestare — nxit animacionin e "hedhjes" së letrave në dorë */
+  justDealt = false;
+
   private subs: Subscription[] = [];
 
   /** Numërim mbrapsht deri sa vendet bosh mbushen automatikisht me BOT (vetëm gjatë WAITING_FOR_PLAYERS) */
@@ -60,10 +66,13 @@ export class DerrBoardComponent implements OnInit, OnDestroy {
     this.subs.push(
       this.ws.state$.subscribe((s) => {
         if (s) this.detectEscape(this.state, s);
+        if (s) this.detectDrawAnimation(this.state, s);
+        const wasWaiting = this.state?.phase === 'WAITING_FOR_PLAYERS';
         this.state = s;
         if (s) {
           this.syncLobbyCountdown(s);
           this.voiceChat.syncPeers(s.players.filter((p) => !p.bot).map((p) => p.id));
+          if (wasWaiting && s.phase === 'PLAYING') this.triggerDealAnimation();
         }
         this.cdr.markForCheck();
       }),
@@ -126,6 +135,57 @@ export class DerrBoardComponent implements OnInit, OnDestroy {
     this.escapeMessage = `🎉 ${escaped.username} shpëtoi!`;
     if (this.escapeMessageTimer) clearTimeout(this.escapeMessageTimer);
     this.escapeMessageTimer = setTimeout(() => { this.escapeMessage = null; this.cdr.markForCheck(); }, 2500);
+  }
+
+  /** Zbulon nëse unë sapo tërhoqa një letër (blind draw) dhe nis animacionin "fluturues" drejt dorës sime */
+  private detectDrawAnimation(prev: DerrStateView | null, next: DerrStateView): void {
+    if (!prev || prev.phase !== 'PLAYING') return;
+    const myself = this.me; // ende pasqyron `prev`, sepse this.state s'është rifreskuar akoma
+    if (!myself || prev.drawerSeat !== myself.seatIndex) return;
+    if (prev.holderSeat === next.holderSeat && prev.drawerSeat === next.drawerSeat) return;
+
+    const seatOffset = (prev.holderSeat - myself.seatIndex + 4) % 4;
+    const direction: 'top' | 'left' | 'right' = seatOffset === 2 ? 'top' : seatOffset === 1 ? 'left' : 'right';
+
+    const paired = next.burnedPairs.length > prev.burnedPairs.length;
+    let card: Card | null = null;
+    if (paired) {
+      card = parseCardLabel(next.burnedPairs[next.burnedPairs.length - 2]);
+    } else {
+      const nextMe = next.players.find((p) => p.id === myself.id);
+      const labels = nextMe?.myHand ?? [];
+      if (labels.length) card = parseCardLabel(labels[labels.length - 1]);
+    }
+    this.triggerFlyingDraw(direction, card, paired);
+  }
+
+  private triggerFlyingDraw(direction: 'top' | 'left' | 'right', card: Card | null, paired: boolean): void {
+    this.flyingDraw = { direction, card, arrived: false, burn: false, fadeOut: false };
+    this.cdr.markForCheck();
+    setTimeout(() => {
+      if (!this.flyingDraw) return;
+      this.flyingDraw = { ...this.flyingDraw, arrived: true };
+      this.cdr.markForCheck();
+      setTimeout(() => {
+        if (!this.flyingDraw) return;
+        if (paired) {
+          this.flyingDraw = { ...this.flyingDraw, burn: true };
+          this.cdr.markForCheck();
+          setTimeout(() => { this.flyingDraw = null; this.cdr.markForCheck(); }, 650);
+        } else {
+          this.flyingDraw = { ...this.flyingDraw, fadeOut: true };
+          this.cdr.markForCheck();
+          setTimeout(() => { this.flyingDraw = null; this.cdr.markForCheck(); }, 400);
+        }
+      }, 560);
+    }, 20);
+  }
+
+  /** Nis animacionin e "hedhjes" së letrave në dorë pas shpërndarjes fillestare */
+  private triggerDealAnimation(): void {
+    this.justDealt = true;
+    this.cdr.markForCheck();
+    setTimeout(() => { this.justDealt = false; this.cdr.markForCheck(); }, 900);
   }
 
   /** Nis/ndal numërimin mbrapsht të lobby-t sipas fazës aktuale të lojës */
