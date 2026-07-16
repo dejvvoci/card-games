@@ -424,13 +424,9 @@
 
   .opponent-hand { transform: scale(0.85); transform-origin: center; }
 
-  .my-hand {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    justify-content: flex-start;
-    flex-wrap: nowrap;
-  }
-  .my-hand app-playing-card { flex-shrink: 0; }
+  /* Letrat mbeten "wrap" (jo scroll horizontal) — scroll-i krijonte konflikt me
+     prekjen në iOS (tap/swipe kundrejt scroll-it nativ), duke penguar zgjedhjen/hedhjen. */
+  .my-hand { row-gap: 10px; }
 
   .action-bar { gap: 6px; }
   .action-bar button { padding: 7px 12px; font-size: 12px; }

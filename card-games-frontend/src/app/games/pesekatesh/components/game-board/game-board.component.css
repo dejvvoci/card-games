@@ -508,13 +508,13 @@
   .hand-back { transform: scale(0.8); transform-origin: center; }
   .hand-back.vertical { transform: scale(0.8); }
 
+  /* Letrat mbeten "wrap" (jo scroll horizontal) — scroll-i krijonte konflikt me
+     prekjen në iOS (tap/swipe kundrejt scroll-it nativ), duke penguar zgjedhjen/luajtjen. */
   .my-hand {
     padding: 6px 0;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    justify-content: flex-start;
+    flex-wrap: wrap;
+    row-gap: 10px;
   }
-  .my-hand app-playing-card { flex-shrink: 0; }
 
   .round-info { font-size: 12px; }
 
