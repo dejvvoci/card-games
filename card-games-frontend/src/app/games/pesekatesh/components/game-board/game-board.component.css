@@ -247,6 +247,26 @@
   width: fit-content;
 }
 
+.leave-btn {
+  display: block;
+  margin: 0 auto 10px;
+  background: transparent;
+  border: 1.5px solid var(--color-border-strong);
+  color: var(--color-text-muted);
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: var(--weight-semibold);
+  padding: 6px 16px;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+.leave-btn:hover {
+  background: var(--color-accent-soft);
+  color: var(--color-accent-deep);
+  border-color: var(--color-accent);
+}
+
 .voice-chat-panel {
   position: fixed;
   right: 16px;

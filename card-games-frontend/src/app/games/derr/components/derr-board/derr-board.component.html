@@ -44,6 +44,9 @@
   <!-- Njoftimi "X shpëtoi!" -->
   <div class="escape-toast" *ngIf="escapeMessage">{{ escapeMessage }}</div>
 
+  <!-- Largohu nga loja: vetëm kundër BOT-ëve, s'lejohet kur ka lojtarë realë -->
+  <button class="leave-btn" *ngIf="mode==='solo'" (click)="backToSelector()">🚪 Largohu nga loja</button>
+
   <!-- Dhoma ende pret lojtarë: vendet bosh mbushen automatikisht me BOT pas numërimit mbrapsht -->
   <div class="lobby-banner" *ngIf="s.phase === 'WAITING_FOR_PLAYERS'">
     Duke pritur lojtarë... {{ s.players.length }}/4

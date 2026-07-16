@@ -35,6 +35,9 @@
   <!-- Lidhja u ndërpre — STOMP-i po riprovon vetë, s'ka nevojë të bësh asgjë -->
   <div class="reconnect-banner" *ngIf="!wsConnected">🔌 Lidhja u ndërpre — duke u rilidhur...</div>
 
+  <!-- Largohu nga loja: vetëm kundër BOT-it, s'lejohet kur ka lojtar real -->
+  <button class="leave-btn" *ngIf="mode==='solo'" (click)="backToSelector()">🚪 Largohu nga loja</button>
+
   <!-- Dhoma ende pret lojtarë: vendi bosh mbushet automatikisht me BOT pas numërimit mbrapsht -->
   <div class="lobby-banner" *ngIf="s.phase === 'WAITING_FOR_PLAYERS'">
     Duke pritur lojtarin tjetër... {{ s.players.length }}/2
@@ -73,11 +76,11 @@
     </div>
   </div>
 
-  <!-- QENDRA: Talon + Grumbulli i hapur (çdo letër e dukshme veç e veç) -->
+  <!-- QENDRA: Pako + Grumbulli i hapur (çdo letër e dukshme veç e veç) -->
   <div class="center-row">
     <div class="pile closed-pile" (click)="onDrawClosed()" [class.active]="canDrawClosed" [class.pulse]="talonPulse">
       <app-playing-card [faceDown]="true" [width]="46" backFill="#8a2222"></app-playing-card>
-      <span class="pile-label">Talon ({{ s.closedPileCount }})</span>
+      <span class="pile-label">Pako ({{ s.closedPileCount }})</span>
     </div>
 
     <div class="open-pile-area">
@@ -146,7 +149,7 @@
   <!-- BUTONAT E VEPRIMIT -->
   <div class="action-bar">
     <button (click)="onDiscard()" [disabled]="!canDiscard">Hidhe letrën (1)</button>
-    <button (click)="onDrawClosed()" [disabled]="!canDrawClosed">Tërhiq nga Talon</button>
+    <button (click)="onDrawClosed()" [disabled]="!canDrawClosed">Tërhiq nga Pako</button>
     <button (click)="onTakeOpenPile()" [disabled]="!canTakeOpenPile">Merr gjithë tokën</button>
 
     <ng-container *ngIf="!me?.hasOpened">
