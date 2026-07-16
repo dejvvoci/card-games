@@ -180,6 +180,8 @@
       </app-playing-card>
     </div>
 
+    <!-- Veprimet kryesore — gjithmonë fikse dhe të dukshme, pavarësisht sa hapësirë zë dora e letrave -->
+    <div class="action-dock">
     <!-- Letra u zgjodh (u ngrit pak) — konfirmohet me buton, më e sigurt se tap-i i drejtpërdrejtë -->
     <button class="play-selected-btn" *ngIf="selectedCard" [disabled]="!canPlaySelectedCard" (click)="onPlaySelectedCard()">
       {{ mustGiveCardToBlocked ? '👉 Jepja letrën' : '▶ Luaj letrën' }}
@@ -189,6 +191,7 @@
             (click)="onPassClick()">
       Pass
     </button>
+    </div><!-- /.action-dock -->
 
     <div class="blocked-msg" *ngIf="amIBlocked">Je i bllokuar — pret letër nga lojtari para teje...</div>
     <div class="trade-msg" *ngIf="mustGiveCardToBlocked">👉 Zgjidh një letër për t'ia dhënë lojtarit të bllokuar</div>
