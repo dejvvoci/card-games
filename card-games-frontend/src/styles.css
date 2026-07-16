@@ -7,6 +7,9 @@
 html, body {
   margin: 0;
   padding: 0;
+  /* Pa "bounce" gome/overscroll aksidental gjatë lojës (zoom-i pengohet te viewport meta);
+     faqet me përmbajtje më të gjatë se ekrani (p.sh. lobby-ja) ruajnë scroll-in normal të tyre */
+  overscroll-behavior-y: none;
   background: var(--color-bg);
   color: var(--color-text);
   font-family: var(--font-body);

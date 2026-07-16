@@ -48,6 +48,13 @@ public class GameController {
         GameSession session = roomManager.getOrCreateRoom(roomId, msg.isSoloVsBots(), msg.isShtatatEveryRound());
         GameState state = session.getState();
 
+        // getOrCreateRoom vendos shtatatEveryRound vetëm herën e parë që krijohet dhoma (computeIfAbsent).
+        // Nëse dhoma ekzistonte tashmë (p.sh. kod dhome i ripërdorur) por loja s'ka filluar akoma,
+        // sinkronizoje me zgjedhjen e fundit të lojtarit që po hyn — përndryshe preferenca e tij injorohet heshtazi.
+        if (state.getPhase() == GamePhase.WAITING_FOR_PLAYERS) {
+            state.setShtatatEveryRound(msg.isShtatatEveryRound());
+        }
+
         if (state.getPlayers().stream().noneMatch(p -> p.getId().equals(msg.getPlayerId())) && !session.isFull()) {
             int seat = state.getPlayers().size();
             Player player = new Player(msg.getPlayerId(), msg.getUsername(), false, seat);

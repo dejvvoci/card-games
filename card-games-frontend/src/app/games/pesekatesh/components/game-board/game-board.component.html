@@ -205,15 +205,21 @@
     </ng-container>
   </div>
 
-  <!-- Buton + panel i historikut të marrjeve (trick-et e mia në raundin aktual) -->
+  <!-- Buton + modal i historikut të marrjeve (trick-et e mia në raundin aktual) -->
   <button class="history-toggle-btn" (click)="toggleHistory()">
-    🃏 Marrjet e mia ({{ myCapturedTricks.length }})
+    🃏 Letrat e tërhequra ({{ myCapturedTricks.length }})
   </button>
-  <div class="history-panel" *ngIf="showHistory">
-    <p class="history-empty" *ngIf="!myCapturedTricks.length">Ende s'ke marrë asnjë dorë në këtë raund.</p>
-    <div class="history-trick" *ngFor="let trick of myCapturedTricks; let i = index">
-      <span class="history-trick-label">#{{ i + 1 }}</span>
-      <app-playing-card *ngFor="let c of trick" [suit]="c.suit" [rank]="c.rank" [width]="28"></app-playing-card>
+  <div class="history-modal-overlay" *ngIf="showHistory" (click)="toggleHistory()">
+    <div class="history-modal-card" (click)="$event.stopPropagation()">
+      <div class="history-modal-header">
+        <h3>Letrat e tërhequra</h3>
+        <button class="history-modal-close" (click)="toggleHistory()">✕</button>
+      </div>
+      <p class="history-empty" *ngIf="!myCapturedTricks.length">Ende s'ke marrë asnjë dorë në këtë raund.</p>
+      <div class="history-trick" *ngFor="let trick of myCapturedTricks; let i = index">
+        <span class="history-trick-label">#{{ i + 1 }}</span>
+        <app-playing-card *ngFor="let c of trick" [suit]="c.suit" [rank]="c.rank" [width]="42"></app-playing-card>
+      </div>
     </div>
   </div>
 

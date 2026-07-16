@@ -1,7 +1,11 @@
 .table-container {
   display: grid;
   grid-template-rows: auto auto 1fr auto;
+  /* Madhësia statike sa ekrani — 100dvh përshtatet me shiritin dinamik të browser-it në mobile,
+     ku 100vh mund të mos jetë i saktë (100vh si rezervë për browser-a më të vjetër) */
   height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
   background: var(--color-bg);
   color: var(--color-text);
   font-family: var(--font-body);
@@ -352,22 +356,50 @@
   box-shadow: var(--shadow-soft);
   z-index: 9;
 }
-.history-panel {
+.history-modal-overlay {
   position: fixed;
-  left: 16px;
-  bottom: 60px;
-  width: 220px;
-  max-height: 320px;
-  overflow-y: auto;
+  inset: 0;
+  background: rgba(20, 18, 15, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 25;
+  padding: 24px;
+  box-sizing: border-box;
+}
+.history-modal-card {
   background: var(--color-surface);
-  border: 1.5px solid var(--color-border-strong);
-  border-radius: var(--radius-sm);
-  padding: 12px;
+  border-radius: var(--radius-lg);
+  padding: 24px 28px;
+  width: 100%;
+  max-width: 560px;
+  max-height: 82vh;
+  overflow-y: auto;
   box-shadow: var(--shadow-soft);
-  z-index: 9;
+  box-sizing: border-box;
+}
+.history-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+.history-modal-header h3 {
+  font-family: var(--font-display);
+  font-weight: var(--weight-semibold);
+  font-size: 19px;
+  color: var(--color-primary-deep);
+  margin: 0;
+}
+.history-modal-close {
+  background: transparent;
+  border: none;
+  font-size: 17px;
+  cursor: pointer;
+  color: var(--color-text-muted);
 }
 .history-empty {
-  font-size: 12px;
+  font-size: 14px;
   color: var(--color-text-muted);
   font-style: italic;
   margin: 0;
@@ -375,14 +407,14 @@
 .history-trick {
   display: flex;
   align-items: center;
-  gap: 2px;
-  margin-bottom: 8px;
+  gap: 4px;
+  margin-bottom: 14px;
 }
 .history-trick-label {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: var(--weight-semibold);
   color: var(--color-text-muted);
-  width: 20px;
+  width: 26px;
 }
 
 .round-over-banner, .game-over-banner {
@@ -565,7 +597,8 @@
   .leave-btn { top: 6px; left: 6px; padding: 6px 10px; font-size: 10px; }
 
   .history-toggle-btn { left: 6px; bottom: auto; top: 44px; padding: 6px 10px; font-size: 10px; }
-  .history-panel { left: 6px; top: 82px; width: 180px; max-height: 220px; }
+  .history-modal-card { padding: 18px 16px; max-height: 88vh; }
+  .history-modal-header h3 { font-size: 16px; }
 
   .round-over-banner, .game-over-banner { padding: 20px 18px; min-width: 220px; width: calc(100vw - 40px); box-sizing: border-box; }
 }
