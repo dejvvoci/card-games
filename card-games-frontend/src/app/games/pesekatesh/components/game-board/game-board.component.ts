@@ -32,6 +32,9 @@ export class GameBoardComponent implements OnInit, OnDestroy {
   /** Kur jam unë duke transferuar letër te lojtari i bllokuar (Kati 5) */
   selectingCardForTrade = false;
 
+  /** Letra e zgjedhur në dorë — pret konfirmim me butonin "Luaj letrën" (më e sigurt se tap-i i drejtpërdrejtë në disa telefona) */
+  selectedCard: Card | null = null;
+
   // ---- Ekrani i hyrjes (para lidhjes WebSocket) ----
   joined = false;
   username = '';
@@ -76,6 +79,10 @@ export class GameBoardComponent implements OnInit, OnDestroy {
           this.handleTrickAnimation(s);
           this.syncLobbyCountdown(s);
           this.voiceChat.syncPeers(s.players.filter((p) => !p.bot).map((p) => p.id));
+        }
+        // Letra e zgjedhur s'është më relevante pas ndryshimit të radhës/gjendjes (p.sh. u luajt tashmë nga ne, ose radha kaloi)
+        if (this.selectedCard && (!this.isMyTurn || !this.myHandCards.some((c) => c.suit === this.selectedCard!.suit && c.rank === this.selectedCard!.rank))) {
+          this.selectedCard = null;
         }
         this.cdr.markForCheck();
       }),
@@ -379,15 +386,34 @@ export class GameBoardComponent implements OnInit, OnDestroy {
   //  VEPRIME TË PËRDORUESIT
   // ============================================================
 
+  isSelectedCard(card: Card): boolean {
+    return !!this.selectedCard && this.selectedCard.suit === card.suit && this.selectedCard.rank === card.rank;
+  }
+
+  /** Tap mbi një letër: e zgjedh (ngrihet pak) ose e ç'zgjedh nëse ishte tashmë e zgjedhur — lojtaja konfirmohet me butonin "Luaj letrën" */
   onCardClick(card: Card): void {
+    this.selectedCard = this.isSelectedCard(card) ? null : card;
+  }
+
+  get canPlaySelectedCard(): boolean {
+    if (!this.selectedCard) return false;
+    if (this.mustGiveCardToBlocked) return true;
+    return this.isCardPlayable(this.selectedCard);
+  }
+
+  /** Buton "Luaj letrën" — konfirmon lojtaren e letrës së zgjedhur (më e sigurt se tap-i i drejtpërdrejtë në disa telefona) */
+  onPlaySelectedCard(): void {
+    const card = this.selectedCard;
+    if (!card) return;
+
     if (this.mustGiveCardToBlocked) {
-      // Jam duke zgjedhur çfarë letre t'i jap lojtarit të bllokuar
       const blockedPlayer = this.state!.players.find(
         (p) => p.seatIndex === this.state!.blockedPlayerSeat,
       );
       if (blockedPlayer) {
         this.ws.tradeCard(card, blockedPlayer.id);
       }
+      this.selectedCard = null;
       return;
     }
 
@@ -396,6 +422,7 @@ export class GameBoardComponent implements OnInit, OnDestroy {
       return;
     }
     this.ws.playCard(card);
+    this.selectedCard = null;
   }
 
   onPassClick(): void {

@@ -187,6 +187,26 @@
 .my-hand app-playing-card { margin-left: -22px; }
 .my-hand app-playing-card:first-child { margin-left: 0; }
 
+.play-selected-btn {
+  display: block;
+  margin: 10px auto 0;
+  background: var(--color-primary);
+  color: var(--color-text-on-primary);
+  border: none;
+  padding: 13px 32px;
+  border-radius: var(--radius-pill);
+  font-weight: var(--weight-semibold);
+  font-size: 15px;
+  cursor: pointer;
+  box-shadow: var(--shadow-soft);
+  animation: play-btn-in 0.18s ease;
+}
+.play-selected-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+@keyframes play-btn-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
 .pass-btn {
   background: var(--color-accent);
   color: var(--color-text-on-accent);

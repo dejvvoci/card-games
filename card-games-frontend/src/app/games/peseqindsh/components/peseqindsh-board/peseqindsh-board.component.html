@@ -148,15 +148,15 @@
 
   <!-- BUTONAT E VEPRIMIT -->
   <div class="action-bar">
-    <button (click)="onDiscard()" [disabled]="!canDiscard">Hidhe letrën (1)</button>
+    <button class="primary-action-btn" [class.ready]="canDiscard" (click)="onDiscard()" [disabled]="!canDiscard">▶ Hidhe letrën</button>
     <button (click)="onDrawClosed()" [disabled]="!canDrawClosed">Tërhiq nga Pako</button>
     <button (click)="onTakeOpenPile()" [disabled]="!canTakeOpenPile">Merr gjithë tokën</button>
 
     <ng-container *ngIf="!me?.hasOpened">
-      <button (click)="onStageGroup()" [disabled]="!canStageSelectedGroup">Vendos mënjanë (grup ≥3)</button>
+      <button class="primary-action-btn" [class.ready]="canStageSelectedGroup" (click)="onStageGroup()" [disabled]="!canStageSelectedGroup">▶ Vendos mënjanë (grup ≥3)</button>
     </ng-container>
     <ng-container *ngIf="me?.hasOpened">
-      <button (click)="onAddMeld()" [disabled]="!canAddSelectedAsMeld">Fut kombinim të ri</button>
+      <button class="primary-action-btn" [class.ready]="canAddSelectedAsMeld" (click)="onAddMeld()" [disabled]="!canAddSelectedAsMeld">▶ Fut kombinim të ri</button>
     </ng-container>
 
     <button (click)="onEndForcedTurn()" [disabled]="!canEndForcedTurn" *ngIf="s.phase==='PLAYING' && s.tookOpenPileThisTurn">
