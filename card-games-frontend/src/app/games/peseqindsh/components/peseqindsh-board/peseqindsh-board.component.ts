@@ -10,14 +10,13 @@ import { PlayingCardComponent } from '../../../../shared/playing-card/playing-ca
 import { AuthService } from '../../../../auth/auth.service';
 import { VoiceChatService } from '../../../../voice/voice-chat.service';
 import { saveGameSession, loadGameSession, clearGameSession } from '../../../../shared/game-session-store';
-import { SwipeUpDirective } from '../../../../shared/swipe-up.directive';
 
 const SESSION_KEY = 'peseqindsh';
 
 @Component({
   selector: 'app-peseqindsh-board',
   standalone: true,
-  imports: [CommonModule, FormsModule, PlayingCardComponent, SwipeUpDirective],
+  imports: [CommonModule, FormsModule, PlayingCardComponent],
   templateUrl: './peseqindsh-board.component.html',
   styleUrls: ['./peseqindsh-board.component.css'],
 })
@@ -381,13 +380,6 @@ export class PeseqindshBoardComponent implements OnInit, OnDestroy {
     if (!this.canDiscard) return;
     this.ws.discard(this.selectedCards[0]);
     this.selectedCards = [];
-  }
-
-  /** Gjest touch: fshirja lart mbi një letër e hedh direkt në tokë, pa nevojën e zgjedhjes+butonit */
-  onSwipeDiscard(card: Card): void {
-    if (!this.isMyTurn || this.state?.discardedThisTurn) return;
-    this.ws.discard(card);
-    this.selectedCards = this.selectedCards.filter((c) => !(c.suit === card.suit && c.rank === card.rank));
   }
 
   onDrawClosed(): void {

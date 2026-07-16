@@ -176,8 +176,6 @@
         [clickable]="true"
         [selected]="isSelectedCard(card)"
         [dimmed]="!isCardPlayable(card) && !mustGiveCardToBlocked"
-        appSwipeUp
-        (appSwipeUp)="onCardClick(card)"
         (cardClick)="onCardClick(card)">
       </app-playing-card>
     </div>

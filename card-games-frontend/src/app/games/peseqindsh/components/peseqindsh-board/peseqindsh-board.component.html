@@ -136,8 +136,6 @@
       [class.dragging]="i === dragFromIndex"
       [class.drag-over]="i === dragOverIndex && i !== dragFromIndex"
       [attr.draggable]="isTouchDevice ? 'false' : 'true'"
-      appSwipeUp
-      (appSwipeUp)="onSwipeDiscard(card)"
       (cardClick)="toggleSelect(card)"
       (dragstart)="onHandDragStart(i, $event)"
       (dragover)="onHandDragOver(i, $event)"

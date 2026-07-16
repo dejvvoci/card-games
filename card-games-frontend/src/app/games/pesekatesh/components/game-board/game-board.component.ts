@@ -10,14 +10,13 @@ import { PlayingCardComponent } from '../../../../shared/playing-card/playing-ca
 import { AuthService } from '../../../../auth/auth.service';
 import { VoiceChatService } from '../../../../voice/voice-chat.service';
 import { saveGameSession, loadGameSession, clearGameSession } from '../../../../shared/game-session-store';
-import { SwipeUpDirective } from '../../../../shared/swipe-up.directive';
 
 const SESSION_KEY = 'pesekatesh';
 
 @Component({
   selector: 'app-game-board',
   standalone: true,
-  imports: [CommonModule, FormsModule, PlayingCardComponent, SwipeUpDirective],
+  imports: [CommonModule, FormsModule, PlayingCardComponent],
   templateUrl: './game-board.component.html',
   styleUrls: ['./game-board.component.css'],
 })
