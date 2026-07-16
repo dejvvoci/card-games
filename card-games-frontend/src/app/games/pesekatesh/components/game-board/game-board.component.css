@@ -247,24 +247,45 @@
   width: fit-content;
 }
 
+.spinner {
+  display: inline-block;
+  width: 13px;
+  height: 13px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  opacity: 0.7;
+  vertical-align: -2px;
+  margin-right: 7px;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
 .leave-btn {
-  display: block;
-  margin: 0 auto 10px;
-  background: transparent;
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  z-index: 9;
+  background: var(--color-surface);
   border: 1.5px solid var(--color-border-strong);
   color: var(--color-text-muted);
   font-family: var(--font-body);
   font-size: 12px;
   font-weight: var(--weight-semibold);
-  padding: 6px 16px;
+  padding: 8px 16px;
   border-radius: var(--radius-pill);
   cursor: pointer;
+  box-shadow: var(--shadow-soft);
   transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
-.leave-btn:hover {
-  background: var(--color-accent-soft);
-  color: var(--color-accent-deep);
-  border-color: var(--color-accent);
+@media (hover: hover) and (pointer: fine) {
+  .leave-btn:hover {
+    background: var(--color-accent-soft);
+    color: var(--color-accent-deep);
+    border-color: var(--color-accent);
+  }
 }
 
 .voice-chat-panel {
@@ -521,8 +542,10 @@
   .voice-chat-panel { right: 6px; bottom: auto; top: 6px; }
   .voice-chat-panel button { padding: 6px 10px; font-size: 10px; }
 
-  .history-toggle-btn { left: 6px; bottom: auto; top: 6px; padding: 6px 10px; font-size: 10px; }
-  .history-panel { left: 6px; top: 44px; width: 180px; max-height: 220px; }
+  .leave-btn { top: 6px; left: 6px; padding: 6px 10px; font-size: 10px; }
+
+  .history-toggle-btn { left: 6px; bottom: auto; top: 44px; padding: 6px 10px; font-size: 10px; }
+  .history-panel { left: 6px; top: 82px; width: 180px; max-height: 220px; }
 
   .round-over-banner, .game-over-banner { padding: 20px 18px; min-width: 220px; width: calc(100vw - 40px); box-sizing: border-box; }
 }

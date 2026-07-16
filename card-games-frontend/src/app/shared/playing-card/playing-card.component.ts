@@ -55,8 +55,16 @@ import { Suit, SUIT_SYMBOL, rankLabel } from '../../models/card.model';
       filter: drop-shadow(0 4px 10px rgba(43,42,37,0.22));
       transition: transform 0.18s ease, filter 0.18s ease;
     }
-    .playing-card.clickable { cursor: pointer; }
-    .playing-card.clickable:hover { transform: translateY(-8px); }
+    .playing-card.clickable {
+      cursor: pointer;
+      /* touch-action: prek/klikon menjëherë, pa vonesën e zoom-it me dopio-prekje */
+      touch-action: manipulation;
+    }
+    /* :hover VETËM për pajisje me miun real — në iOS/touch, :hover pa këtë kufizim e "gëlltit"
+       prekjen e parë (aktivizon vetëm gjendjen hover, jo click-un), duke kërkuar prekje të dytë. */
+    @media (hover: hover) and (pointer: fine) {
+      .playing-card.clickable:hover { transform: translateY(-8px); }
+    }
     .playing-card.selected {
       transform: translateY(-16px);
       filter: drop-shadow(0 6px 16px rgba(193,110,81,0.35));

@@ -41,14 +41,14 @@
   <div class="error-toast" *ngIf="errorMessage">{{ errorMessage }}</div>
 
   <!-- Lidhja u ndërpre — STOMP-i po riprovon vetë, s'ka nevojë të bësh asgjë -->
-  <div class="reconnect-banner" *ngIf="!wsConnected">🔌 Lidhja u ndërpre — duke u rilidhur...</div>
+  <div class="reconnect-banner" *ngIf="!wsConnected"><span class="spinner"></span>🔌 Lidhja u ndërpre — duke u rilidhur...</div>
 
   <!-- Largohu nga loja: vetëm kundër BOT-ëve, s'lejohet kur ka lojtarë realë -->
   <button class="leave-btn" *ngIf="mode==='solo'" (click)="backToSelector()">🚪 Largohu nga loja</button>
 
   <!-- Dhoma ende pret lojtarë: vendet bosh mbushen automatikisht me BOT pas numërimit mbrapsht -->
   <div class="lobby-banner" *ngIf="s.phase === 'WAITING_FOR_PLAYERS'">
-    Duke pritur lojtarë... {{ s.players.length }}/4
+    <span class="spinner"></span>Duke pritur lojtarë... {{ s.players.length }}/4
     <ng-container *ngIf="s.players.length < 4">
       — vendet bosh plotësohen me BOT për {{ lobbySecondsLeft }}s
     </ng-container>
@@ -237,5 +237,5 @@
 </div>
 
 <div class="waiting-screen" *ngIf="joined && !state">
-  <p>Duke u lidhur me lojën...</p>
+  <p><span class="spinner"></span>Duke u lidhur me lojën...</p>
 </div>

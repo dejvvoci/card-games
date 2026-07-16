@@ -39,7 +39,7 @@
   <div class="error-toast" *ngIf="errorMessage">{{ errorMessage }}</div>
 
   <!-- Lidhja u ndërpre — STOMP-i po riprovon vetë, s'ka nevojë të bësh asgjë -->
-  <div class="reconnect-banner" *ngIf="!wsConnected">🔌 Lidhja u ndërpre — duke u rilidhur...</div>
+  <div class="reconnect-banner" *ngIf="!wsConnected"><span class="spinner"></span>🔌 Lidhja u ndërpre — duke u rilidhur...</div>
 
   <!-- Njoftimi "X shpëtoi!" -->
   <div class="escape-toast" *ngIf="escapeMessage">{{ escapeMessage }}</div>
@@ -49,7 +49,7 @@
 
   <!-- Dhoma ende pret lojtarë: vendet bosh mbushen automatikisht me BOT pas numërimit mbrapsht -->
   <div class="lobby-banner" *ngIf="s.phase === 'WAITING_FOR_PLAYERS'">
-    Duke pritur lojtarë... {{ s.players.length }}/4
+    <span class="spinner"></span>Duke pritur lojtarë... {{ s.players.length }}/4
     <ng-container *ngIf="s.players.length < 4">
       — vendet bosh plotësohen me BOT për {{ lobbySecondsLeft }}s
     </ng-container>
@@ -92,10 +92,10 @@
         👉 Tërhiq një letër (e verbër) nga {{ holderPlayer?.username }}
       </div>
       <div class="draw-instruction waiting" *ngIf="s.phase==='PLAYING' && isMyHolding">
-        🤲 {{ drawerPlayer?.username }} po tërheq një letër nga dora jote...
+        <span class="spinner"></span>🤲 {{ drawerPlayer?.username }} po tërheq një letër nga dora jote...
       </div>
       <div class="draw-instruction waiting" *ngIf="s.phase==='PLAYING' && !isMyTurn && !isMyHolding">
-        ⏳ {{ drawerPlayer?.username }} po tërheq nga {{ holderPlayer?.username }}...
+        <span class="spinner"></span>⏳ {{ drawerPlayer?.username }} po tërheq nga {{ holderPlayer?.username }}...
       </div>
 
       <div class="burned-count" [class.flash]="justDealt" *ngIf="s.burnedPairs.length">
@@ -173,5 +173,5 @@
 </div>
 
 <div class="waiting-screen" *ngIf="joined && !state">
-  <p>Duke u lidhur me lojën...</p>
+  <p><span class="spinner"></span>Duke u lidhur me lojën...</p>
 </div>

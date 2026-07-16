@@ -151,24 +151,45 @@
 .error-toast { background: #f8d7da; color: #842029; }
 .reconnect-banner { color: #8a4a10; background: #fff3d6; border: 1.5px solid #e0b357; }
 
+.spinner {
+  display: inline-block;
+  width: 13px;
+  height: 13px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  opacity: 0.7;
+  vertical-align: -2px;
+  margin-right: 7px;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
 .leave-btn {
-  display: block;
-  margin: 0 auto 4px;
-  background: transparent;
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  z-index: 9;
+  background: var(--color-surface);
   border: 1.5px solid var(--color-border-strong);
   color: var(--color-text-muted);
   font-family: var(--font-body);
   font-size: 12px;
   font-weight: var(--weight-semibold);
-  padding: 6px 16px;
+  padding: 8px 16px;
   border-radius: var(--radius-pill);
   cursor: pointer;
+  box-shadow: var(--shadow-soft-tertiary);
   transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
-.leave-btn:hover {
-  background: var(--color-tertiary-soft);
-  color: var(--color-tertiary-deep);
-  border-color: var(--color-tertiary);
+@media (hover: hover) and (pointer: fine) {
+  .leave-btn:hover {
+    background: var(--color-tertiary-soft);
+    color: var(--color-tertiary-deep);
+    border-color: var(--color-tertiary);
+  }
 }
 .escape-toast { background: var(--color-primary); color: var(--color-text-on-primary); }
 .lobby-banner {
@@ -432,6 +453,8 @@
 
   .voice-chat-panel { right: 6px; bottom: auto; top: 6px; }
   .voice-chat-panel button { padding: 6px 10px; font-size: 10px; }
+
+  .leave-btn { top: 6px; left: 6px; padding: 6px 10px; font-size: 10px; }
 
   .draw-overlay-title { font-size: 15px; }
   .draw-overlay-cards app-playing-card svg { width: 64px !important; height: auto !important; }
