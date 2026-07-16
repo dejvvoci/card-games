@@ -10,7 +10,8 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(),
     provideServiceWorker("ngsw-worker.js", {
       enabled: !isDevMode(),
-      registrationStrategy: "registerWhenStable:30000",
+      // Regjistrohet më shpejt (5s) — kështu kontrolli për versione të reja (app.component.ts) nis më herët
+      registrationStrategy: "registerWhenStable:5000",
     }),
   ],
 };
