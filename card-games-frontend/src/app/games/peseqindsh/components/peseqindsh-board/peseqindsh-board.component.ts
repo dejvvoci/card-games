@@ -27,6 +27,9 @@ export class PeseqindshBoardComponent implements OnInit, OnDestroy {
   errorMessage: string | null = null;
   readonly suitSymbol = SUIT_SYMBOL;
   readonly suitColor = SUIT_COLOR;
+
+  /** iOS Safari s'e mbështet HTML5 drag&drop me prekje — çaktivizojmë draggable atje, që të mos krijojë ambiguitet prekje-vs-tërheqje */
+  readonly isTouchDevice = typeof window !== 'undefined' && ('ontouchstart' in window || navigator.maxTouchPoints > 0);
   readonly rankLabel = rankLabel;
 
   /** Letrat e zgjedhura aktualisht nga dora ime (për të formuar një kombinim) */

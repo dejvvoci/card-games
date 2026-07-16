@@ -459,3 +459,15 @@
 
   .round-over-banner, .game-over-banner { width: calc(100vw - 40px); box-sizing: border-box; }
 }
+
+/* ---------- Mobile landscape (telefoni i rrotulluar horizontalisht) ---------- */
+@media (orientation: landscape) and (max-height: 500px) {
+  .board { padding: 6px 10px; gap: 6px; }
+  .felt-surface { padding: 6px 6px; border-width: 5px; gap: 4px; }
+  .score-bar { font-size: 11px; }
+  .score-box { padding: 4px 10px; }
+  .center-row { gap: 10px; margin: 2px 0; }
+  .opponent-hand { transform: scale(0.7); }
+  .my-hand { padding: 2px 0; }
+  .lobby-banner, .reconnect-banner { font-size: 11px; padding: 5px 12px; }
+}

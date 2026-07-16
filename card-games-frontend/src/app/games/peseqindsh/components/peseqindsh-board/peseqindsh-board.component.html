@@ -135,7 +135,7 @@
       [class.just-drawn]="i === justDrewCardIndex"
       [class.dragging]="i === dragFromIndex"
       [class.drag-over]="i === dragOverIndex && i !== dragFromIndex"
-      draggable="true"
+      [attr.draggable]="isTouchDevice ? 'false' : 'true'"
       appSwipeUp
       (appSwipeUp)="onSwipeDiscard(card)"
       (cardClick)="toggleSelect(card)"

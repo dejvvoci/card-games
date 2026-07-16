@@ -23,7 +23,8 @@ import { Suit, SUIT_SYMBOL, rankLabel } from '../../models/card.model';
       [class.selected]="selected"
       [class.dimmed]="dimmed"
       [class.clickable]="clickable"
-      (click)="cardClick.emit()">
+      (click)="onClick()"
+      (touchend)="onTouchEnd($event)">
 
       <rect x="1" y="1" width="68" height="96" rx="10"
             [attr.fill]="faceDown ? backFill : '#FFFDF8'"
@@ -83,6 +84,26 @@ export class PlayingCardComponent {
   @Input() backFill = '#0F5132';
 
   @Output() cardClick = new EventEmitter<void>();
+
+  /** true për një çast pas touchend — pengon click-un "sintetik" pasues (nga i njëjti prekje) të dyfishojë emit-in */
+  private touchHandledUntil = 0;
+
+  /**
+   * iOS Safari ndonjëherë s'e sintetizon në mënyrë të besueshme "click"-un nga prekja (draggable,
+   * ambiguitet prekje-vs-lëvizje, etj.) — e trajtojmë touchend-in direkt, pa u mbështetur te click-u nativ.
+   */
+  onTouchEnd(event: TouchEvent): void {
+    if (!this.clickable) return;
+    event.preventDefault();
+    this.touchHandledUntil = Date.now() + 500;
+    this.cardClick.emit();
+  }
+
+  onClick(): void {
+    if (!this.clickable) return;
+    if (Date.now() < this.touchHandledUntil) return; // e trajtoi tashmë onTouchEnd
+    this.cardClick.emit();
+  }
 
   get height(): number {
     return Math.round(this.width * (98 / 70));

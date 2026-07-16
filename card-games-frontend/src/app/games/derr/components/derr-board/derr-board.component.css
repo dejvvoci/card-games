@@ -461,3 +461,18 @@
 
   .game-over-banner { width: calc(100vw - 40px); box-sizing: border-box; padding: 20px 18px; }
 }
+
+/* ---------- Mobile landscape (telefoni i rrotulluar horizontalisht) ---------- */
+@media (orientation: landscape) and (max-height: 500px) {
+  .table-container { padding: 6px 10px; gap: 4px; }
+  .felt-surface { padding: 6px 4px; border-width: 5px; gap: 4px; }
+  .middle-row { gap: 8px; }
+  .center-felt { min-height: 70px; padding: 6px; }
+  .draw-instruction { font-size: 11px; }
+  .seat-cushion { width: 46px; height: 46px; }
+  .hand-back { transform: scale(0.7); }
+  .hand-back.vertical { transform: scale(0.6); }
+  .my-hand { padding: 2px 0; }
+  .lobby-banner, .reconnect-banner { font-size: 11px; padding: 5px 12px; }
+  .draw-overlay-cards app-playing-card svg { width: 56px !important; height: auto !important; }
+}
