@@ -271,13 +271,34 @@ public class GameService {
         if (state.getBlockedPlayerSeat() != blockedPlayer.getSeatIndex()) {
             throw new IllegalStateException("Nuk ka bllokim aktiv për këtë lojtar.");
         }
+        if (giver.getSeatIndex() != state.getBlockedGiverSeat()) {
+            throw new IllegalStateException("Ky lojtar nuk është dhënësi i pritur për këtë bllokim.");
+        }
         if (!giver.getHand().remove(givenCard)) {
             throw new IllegalStateException("Dhënësi nuk e zotëron këtë letër.");
         }
         blockedPlayer.getHand().add(givenCard);
-        state.setBlockedPlayerSeat(-1);
-        state.setBlockedGiverSeat(-1);
         state.setCurrentPlayerIndex(blockedPlayer.getSeatIndex()); // provon sërish të luajë
+
+        // Letra e dhënë nuk zgjidhet gjithmonë vetë sekuencën e lojtarit të bllokuar (as bot-et, as njerëzit
+        // s'detyrohen ta zgjedhin një letër që patjetër hap një lëvizje) — rikontrollo, përndryshe loja
+        // ngrinte këtu: `blockedPlayerSeat` pastrohej pa kusht dhe askush s'e vazhdonte lojën.
+        if (hasValidSevensMove(state, blockedPlayer)) {
+            state.setBlockedPlayerSeat(-1);
+            state.setBlockedGiverSeat(-1);
+        } else {
+            int nextGiverSeat = previousActiveSeat(state, blockedPlayer.getSeatIndex());
+            if (nextGiverSeat == -1) {
+                // Askush tjetër s'ka letra për t'i dhënë -> ky lojtar mbetet i fundit, raundi mbaron këtu
+                if (!state.getFinishOrder().contains(blockedPlayer.getSeatIndex())) {
+                    state.getFinishOrder().add(blockedPlayer.getSeatIndex());
+                }
+                checkSevensGameEnd(state);
+                return;
+            }
+            state.setBlockedPlayerSeat(blockedPlayer.getSeatIndex());
+            state.setBlockedGiverSeat(nextGiverSeat);
+        }
     }
 
     /** Kërkon prapa (duke anashkaluar lojtarët që kanë mbaruar) seat-in aktiv më të fundit para fromSeat */
