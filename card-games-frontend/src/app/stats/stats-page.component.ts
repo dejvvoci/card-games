@@ -46,7 +46,10 @@ interface GameFilterOption {
           <span class="stat-label">Vend i 4-t</span>
         </div>
       </div>
-      <ng-template #statsLoading><p class="hint">Duke ngarkuar...</p></ng-template>
+      <ng-template #statsLoading>
+        <p class="hint" *ngIf="!loadError">Duke ngarkuar...</p>
+        <p class="hint error" *ngIf="loadError">{{ loadError }}</p>
+      </ng-template>
     </div>
   `,
   styles: [`
@@ -123,6 +126,7 @@ interface GameFilterOption {
       margin-top: 4px;
     }
     .hint { font-size: 13px; color: var(--color-text-muted); }
+    .hint.error { color: var(--color-accent-deep); font-weight: var(--weight-semibold); }
   `],
 })
 export class StatsPageComponent implements OnInit {
@@ -135,6 +139,7 @@ export class StatsPageComponent implements OnInit {
 
   selectedGame: GameTypeKey = 'PESEKATESH';
   stats: GameStats | null = null;
+  loadError: string | null = null;
 
   constructor(private auth: AuthService, private cdr: ChangeDetectorRef) {}
 
@@ -150,8 +155,17 @@ export class StatsPageComponent implements OnInit {
 
   private async loadStats(): Promise<void> {
     this.stats = null;
-    const result = await this.auth.getStats(this.selectedGame);
-    this.stats = result;
+    this.loadError = null;
+    try {
+      this.stats = await this.auth.getStats(this.selectedGame);
+    } catch (err: any) {
+      // Sesioni mund të ketë skaduar (p.sh. pas rindezjes së backend-it) — auth.interceptor.ts
+      // e nxjerr automatikisht nga llogaria në atë rast; këtu vetëm shfaqim mesazh në vend
+      // të "Duke ngarkuar..." të pafund.
+      this.loadError = err?.status === 401
+        ? 'Sesioni yt ka skaduar — hyr sërish në llogari.'
+        : 'S\'u arritën të ngarkoheshin statistikat. Provo sërish.';
+    }
     this.cdr.markForCheck();
   }
 }
