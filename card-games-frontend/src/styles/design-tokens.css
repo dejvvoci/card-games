@@ -1,7 +1,7 @@
 /*
  * DESIGN SYSTEM — "Revistë Arti me Identitet Shqiptar"
  * ------------------------------------------------------------
- * (verifikim auto-deploy Render)
+ * (rideploy manual i detyruar - guest join)
  * Importo këtë skedar një herë te src/styles.css (global), p.sh:
  *   @import './styles/design-tokens.css';
  * Të gjithë komponentët përdorin këto variabla — asnjë ngjyrë/font hardcoded.
