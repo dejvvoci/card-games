@@ -40,6 +40,8 @@ export class GameBoardComponent implements OnInit, OnDestroy {
   mode: 'solo' | 'multiplayer' = 'solo';
   roomId = '';
   shtatatEveryRound = true;
+  /** true nëse u hap përmes linkut "Ndaj lojën" (?room=KODI) — lejon hyrje si mysafir pa llogari */
+  cameFromInviteLink = false;
 
   // ---- Historiku i marrjeve (trick-et e mia gjatë raundit aktual) ----
   showHistory = false;
@@ -109,8 +111,10 @@ export class GameBoardComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // Nëse erdhëm nga një link "Ndaj lojën" (?room=KODI): hyr direkt në dhomë, pa kërkuar rishkrim kodi
+    // Nëse erdhëm nga një link "Ndaj lojën" (?room=KODI): hyr direkt në dhomë, pa kërkuar rishkrim kodi.
+    // Nëse s'ke llogari, s'ke nevojë të krijosh një — thjesht vendos një emër dhe hyr si mysafir.
     if (roomFromLink) {
+      this.cameFromInviteLink = true;
       this.mode = 'multiplayer';
       this.roomId = roomFromLink;
       if (this.canJoin) {
@@ -119,6 +123,11 @@ export class GameBoardComponent implements OnInit, OnDestroy {
     } else {
       this.roomId = this.generateRoomCode();
     }
+  }
+
+  /** true kur dikush pa llogari erdhi përmes linkut ftese — i shfaqet vetëm fusha e emrit, jo formulari i plotë */
+  get isGuestJoin(): boolean {
+    return this.cameFromInviteLink && !this.auth.isLoggedIn();
   }
 
   ngOnDestroy(): void {

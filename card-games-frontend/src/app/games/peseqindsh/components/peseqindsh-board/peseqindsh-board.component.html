@@ -2,29 +2,41 @@
   <div class="join-card">
     <button class="back-btn" (click)="backToSelector()">← Kthehu te lojërat</button>
     <p class="eyebrow">Peseqindsh</p>
-    <h2>Përgatit tavolinën</h2>
 
-    <label class="field-label">Emri yt</label>
-    <input class="field-input" type="text" [(ngModel)]="username" maxlength="20" />
+    <ng-container *ngIf="!isGuestJoin; else guestJoinBlock">
+      <h2>Përgatit tavolinën</h2>
 
-    <label class="field-label">Mënyra e lojës</label>
-    <div class="mode-toggle">
-      <button [class.active]="mode==='solo'" (click)="mode='solo'">Solo (kundër Bot)</button>
-      <button [class.active]="mode==='multiplayer'" (click)="mode='multiplayer'">Multiplayer (2 real)</button>
-    </div>
+      <label class="field-label">Emri yt</label>
+      <input class="field-input" type="text" [(ngModel)]="username" maxlength="20" />
 
-    <ng-container *ngIf="mode==='multiplayer'">
-      <label class="field-label">Kodi i dhomës</label>
-      <div class="room-row">
-        <input class="field-input" type="text" [(ngModel)]="roomId" maxlength="10" />
-        <button class="regenerate-btn" (click)="roomId = generateRoomCode()">🔄</button>
-        <button class="regenerate-btn" (click)="onShareGame()" title="Ndaj lojën">🔗</button>
+      <label class="field-label">Mënyra e lojës</label>
+      <div class="mode-toggle">
+        <button [class.active]="mode==='solo'" (click)="mode='solo'">Solo (kundër Bot)</button>
+        <button [class.active]="mode==='multiplayer'" (click)="mode='multiplayer'">Multiplayer (2 real)</button>
       </div>
-      <p class="hint" *ngIf="!linkCopied">Ndaje këtë kod me shokun tënd — të dy duhet të fusin të njëjtin kod, ose kliko 🔗 për të ndarë linkun direkt.</p>
-      <p class="hint" *ngIf="linkCopied">✓ Linku u kopjua!</p>
+
+      <ng-container *ngIf="mode==='multiplayer'">
+        <label class="field-label">Kodi i dhomës</label>
+        <div class="room-row">
+          <input class="field-input" type="text" [(ngModel)]="roomId" maxlength="10" />
+          <button class="regenerate-btn" (click)="roomId = generateRoomCode()">🔄</button>
+          <button class="regenerate-btn" (click)="onShareGame()" title="Ndaj lojën">🔗</button>
+        </div>
+        <p class="hint" *ngIf="!linkCopied">Ndaje këtë kod me shokun tënd — të dy duhet të fusin të njëjtin kod, ose kliko 🔗 për të ndarë linkun direkt.</p>
+        <p class="hint" *ngIf="linkCopied">✓ Linku u kopjua!</p>
+      </ng-container>
     </ng-container>
 
-    <button class="join-btn" [disabled]="!canJoin" (click)="onJoinSubmit()">Hyr në tavolinë →</button>
+    <ng-template #guestJoinBlock>
+      <h2>U fte për të luajtur! 🎉</h2>
+      <p class="hint">Vendos një emër të përkohshëm — luaj si mysafir, pa nevojën e një llogarie.</p>
+      <label class="field-label">Emri yt (mysafir)</label>
+      <input class="field-input" type="text" [(ngModel)]="username" maxlength="20" placeholder="p.sh. Miku" />
+    </ng-template>
+
+    <button class="join-btn" [disabled]="!canJoin" (click)="onJoinSubmit()">
+      {{ isGuestJoin ? 'Bashkohu si mysafir →' : 'Hyr në tavolinë →' }}
+    </button>
   </div>
 </div>
 
