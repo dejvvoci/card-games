@@ -1,8 +1,3 @@
-databases:
-  # ---- Baza e të dhënave: llogaritë e përdoruesve + historiku i statistikave ----
-  - name: pesekatesh-db
-    plan: free
-
 services:
   # ---- FRONTEND: Angular (Static Site) ----
   - type: web
@@ -26,23 +21,16 @@ services:
     envVars:
       - key: ALLOWED_ORIGINS
         value: "*"   # rregulloje me URL-në e frontend-it (Render Static Site) pas deploy të parë
+      # Baza e të dhënave tani është Supabase (jo Render Postgres — falas i Render-it skadon
+      # përgjithmonë pas 30 ditësh). Vlerat e sakta vendosen manualisht te dashboard-i i Render
+      # (Environment → këto çelësa), të marra nga Supabase → Project Settings → Database.
       - key: DB_HOST
-        fromDatabase:
-          name: pesekatesh-db
-          property: host
+        sync: false
       - key: DB_PORT
-        fromDatabase:
-          name: pesekatesh-db
-          property: port
+        sync: false
       - key: DB_NAME
-        fromDatabase:
-          name: pesekatesh-db
-          property: database
+        sync: false
       - key: DB_USERNAME
-        fromDatabase:
-          name: pesekatesh-db
-          property: user
+        sync: false
       - key: DB_PASSWORD
-        fromDatabase:
-          name: pesekatesh-db
-          property: password
+        sync: false
